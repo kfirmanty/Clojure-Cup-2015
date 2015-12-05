@@ -1,2 +1,7 @@
 (ns synth.instrument
   (:use synth.audio))
+
+(defprotocol Instrument
+  (play [self note])
+  (stop [self note])
+  (set-prop [self prop val]))
