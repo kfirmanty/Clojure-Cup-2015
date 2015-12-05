@@ -1,5 +1,4 @@
-(ns synth.instrument
-  (:use synth.audio))
+(ns synth.instrument)
 
 (defprotocol Instrument
   (play [self note])

@@ -1,9 +1,8 @@
 (ns synth.audio)
 
 (defn audio-context
-  (let [AudioContext (or js/window.AudioContext
-                         js/window.webkitAudioContext)]
-    (AudioContext.)))
+  (let [audioContext (or js/window.AudioContext js/window.webkitAudioContext)]
+    (audioContext.)))
 
 (defn wire [& ms]
   (reduce (fn [x y] (.connect x y) y) ms))
