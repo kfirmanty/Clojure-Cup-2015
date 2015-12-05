@@ -71,3 +71,31 @@
         sh    (shaper ctx [1 1])
         v     (gain ctx n)]
     (wire dummy sh v)))
+
+(defprotocol Node
+  (connect [self somewhere]))
+
+(defprotocol Triggered
+  (trigger [self])
+  (detrigger [self]))
+
+(defrecord ADSR [ctx unit a d s r out]
+  Node
+  (connect [self somewhere] (.connect out somewhere))
+
+  Triggered
+  (trigger [_]
+    (let [t (.-currentTime ctx)]
+      (doto (.-gain out)
+        (.cancelScheduledValues t)
+        (.setValueAtTime 0 t)
+        (.linearRampToValueAtTime 1 (+ t a))
+        (.linearRampToValueAtTime s (+ t a d))))
+    )
+
+  (detrigger [_]
+    (let [t (.-currentTime ctx)]
+      (.linearRampToValueAtTime (.-gain out) 0 (+ t r)))))
+
+(def adsr [ctx unit a d s r]
+  (ADSR. ctx unit a d s r (gain ctx 0)))
