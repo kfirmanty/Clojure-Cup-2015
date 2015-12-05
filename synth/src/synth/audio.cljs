@@ -5,8 +5,8 @@
                          js/window.webkitAudioContext)]
     (AudioContext.)))
 
-(defn wire [& ns]
-  (reduce (fn [x y] (.connect x y) y) ns))
+(defn wire [& ms]
+  (reduce (fn [x y] (.connect x y) y) ms))
 
 (defn buffer [ctx vals]
   (let [b (.createBuffer ctx 1 (count vals) (.-sampleRate ctx))
@@ -100,6 +100,7 @@
 
   (detrigger [_]
     (let [t (.-currentTime ctx)]
+      (.cancelScheduledValues (.-gain out) t)
       (.linearRampToValueAtTime (.-gain out) 0 (+ t r)))))
 
 (defn adsr [ctx unit a d s r]
