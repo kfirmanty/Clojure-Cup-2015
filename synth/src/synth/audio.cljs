@@ -1,8 +1,8 @@
 (ns synth.audio)
 
-(defn audio-context
-  (let [audioContext (or js/window.AudioContext js/window.webkitAudioContext)]
-    (audioContext.)))
+(defn audio-context []
+  (let [c (or js/window.AudioContext js/window.webkitAudioContext)]
+    (c.)))
 
 (defn wire [& ms]
   (reduce (fn [x y] (.connect x y) y) ms))
@@ -35,7 +35,7 @@
       o)
     (noise ctx 2)))
 
-(defn filter [ctx type freq]
+(defn afilter [ctx type freq]
   (let [o (.createBiquadFilter ctx)]
     (set! (.-type o) (name type))
     (aset o "frequency" "value" freq)
@@ -54,18 +54,18 @@
     (set! (.-curve s) vf)
     s))
 
-(defn *~ [ctx a b]
+(defn *- [ctx a b]
   (let [g (gain ctx 0)]
     (wire a g)
     (wire b (.-gain g))
     g))
 
-(defn +~ [ctx & rs]
+(defn +- [ctx & rs]
   (let [g (gain ctx 1)]
     (doseq [r rs] (wire r g))
     g))
 
-(defn mix~ [ctx & rs]
+(defn mix- [ctx & rs]
   (let [g (gain ctx (/ 1 (count rs)))]
     (doseq [r rs] (wire r g))
     g))
