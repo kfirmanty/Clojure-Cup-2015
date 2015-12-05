@@ -34,6 +34,9 @@
 
     (a/setv main-tune 0)
     (a/setv osc2-detune 0.2)
+    (a/setv osc1-gain 1)
+    (a/setv osc2-gain 1)
+
     (a/wire pitch (.-frequency osc1))
     (a/wire pitch (.-frequency osc2))
     (a/wire (:out osc2-detune) (.-frequency osc2))
@@ -52,7 +55,5 @@
   (let [unit (a/constant ctx 1)
         oscs (oscillators ctx unit)
         out (a/gain ctx 0)]
-    (a/setv (:osc1-gain oscs) 1)
-    (a/setv (:osc2-gain oscs) 1)
     (a/wire (:out oscs) out)
     (MG20. ctx oscs out)))
