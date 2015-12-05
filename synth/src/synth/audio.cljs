@@ -49,7 +49,7 @@
      g)))
 
 (defn shaper [ctx vals]
-  (let [vf (js/Float32array. (clj->js vals))
+  (let [vf (js/Float32Array. (clj->js vals))
         s  (.createWaveShaper ctx)]
     (set! (.-curve s) vf)
     s))
@@ -84,7 +84,7 @@
   (detrigger [self]))
 
 (defprotocol Setting
-  (set-now [self val])
+  (setv [self val])
   (slide-to [self val t])
   (current [self]))
 
@@ -122,7 +122,7 @@
 
   Setting
   (current [_] (-> out .-gain .-value))
-  (set-now [_ val] (.setValueAtTime (.-gain out)
+  (setv [_ val] (.setValueAtTime (.-gain out)
                                     (clip val min max)
                                     (.-currentTime ctx)))
   (slide-to [_ val t] (.linearRampToValueAtTime (.-gain out)
@@ -130,7 +130,7 @@
                                                 (+ (.-currentTime ctx) t)))
   )
 
-(defn knob [ctx unit min max out]
+(defn knob [ctx unit min max]
   (Knob. ctx unit min max (wire unit
                                 (gain ctx min))))
 
