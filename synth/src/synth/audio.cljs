@@ -16,8 +16,8 @@
 
 (defn bufsrc [ctx buf]
   (let [bs (.createBufferSource ctx)]
-    (set! (.-buffer bs buf))
-    (set! (.-loop   bs true))
+    (set! (.-buffer bs) buf)
+    (set! (.-loop   bs) true)
     (.start bs 0)
     bs))
 
@@ -66,6 +66,11 @@
     (doseq [r rs] (wire r g))
     g))
 
+(defn mix~ [ctx & rs]
+  (let [g (gain ctx (/ 1 (count rs)))]
+    (doseq [r rs] (wire r g))
+    g))
+
 (defn constant [ctx n]
   (let [dummy (osc ctx :sine 1)
         sh    (shaper ctx [1 1])
@@ -94,14 +99,14 @@
       (doto (.-gain out)
         (.cancelScheduledValues t)
         (.setValueAtTime 0 t)
-        (.linearRampToValueAtTime 1 (+ t a))
-        (.linearRampToValueAtTime s (+ t a d))))
+        (.linearRampToValueAtTime 1 (+ t (current a)))
+        (.linearRampToValueAtTime (current s) (+ t (current a) (current d)))))
     )
 
   (detrigger [_]
     (let [t (.-currentTime ctx)]
       (.cancelScheduledValues (.-gain out) t)
-      (.linearRampToValueAtTime (.-gain out) 0 (+ t r)))))
+      (.linearRampToValueAtTime (.-gain out) 0 (+ t (current r))))))
 
 (defn adsr [ctx unit a d s r]
   (ADSR. ctx unit a d s r (wire unit
@@ -123,7 +128,7 @@
                                     (.-currentTime ctx)))
   (slide-to [_ val t] (.linearRampToValueAtTime (.-gain out)
                                                 (clip val min max)
-                                                (+ (.currentTime ctx) t)))
+                                                (+ (.-currentTime ctx) t)))
   )
 
 (defn knob [ctx unit min max out]
