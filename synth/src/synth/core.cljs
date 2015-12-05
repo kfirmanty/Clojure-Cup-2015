@@ -1,5 +1,8 @@
 (ns synth.core
-  (:require [reagent.core :as reagent :refer [atom]]))
+  (:require [reagent.core :as reagent :refer [atom]]
+            [synth.audio :as audio]
+            [synth.instrument :as i]
+            [synth.mg20 :as syn]))
 
 (enable-console-print!)
 
@@ -9,8 +12,15 @@
 
 (defonce app-state (atom {:text "Hello world!"}))
 
+(defonce ctx (audio/audio-context))
+(defonce s (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
+
+
+
 (defn hello-world []
-  [:h1 (:text @app-state)])
+  [:div [:h1 (:text @app-state)]
+   [:button {:on-click #(i/play s 69)} "on"]
+   [:button {:on-click #(i/stop s 69)} "off"]])
 
 (reagent/render-component [hello-world]
                           (. js/document (getElementById "app")))
