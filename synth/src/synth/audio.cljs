@@ -79,6 +79,11 @@
   (trigger [self])
   (detrigger [self]))
 
+(defprotocol Setting
+  (set-now [self val])
+  (slide-to [self val t])
+  (current [self]))
+
 (defrecord ADSR [ctx unit a d s r out]
   Node
   (connect [self somewhere] (.connect out somewhere))
@@ -97,5 +102,32 @@
     (let [t (.-currentTime ctx)]
       (.linearRampToValueAtTime (.-gain out) 0 (+ t r)))))
 
-(def adsr [ctx unit a d s r]
-  (ADSR. ctx unit a d s r (gain ctx 0)))
+(defn adsr [ctx unit a d s r]
+  (ADSR. ctx unit a d s r (wire unit
+                                (gain ctx 0))))
+
+(defn clip [val min max]
+  (cond (< val min) min
+        (> val max) max
+        :else       val))
+
+(defrecord Knob [ctx unit min max out]
+  Node
+  (connect [self somewhere] (.connect out somewhere))
+
+  Setting
+  (current [_] (-> out .-gain .-value))
+  (set-now [_ val] (.setValueAtTime (.-gain out)
+                                    (clip val min max)
+                                    (.-currentTime ctx)))
+  (slide-to [_ val t] (.linearRampToValueAtTime (.-gain out)
+                                                (clip val min max)
+                                                (+ (.currentTime ctx) t)))
+  )
+
+(defn knob [ctx unit min max out]
+  (Knob. ctx unit min max (wire unit
+                                (gain ctx min))))
+
+(defn midi->hz [midi]
+  (* 440 (js/Math.pow 2.0 (/ (- midi 69) 12))))
