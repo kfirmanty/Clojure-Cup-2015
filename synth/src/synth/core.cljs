@@ -220,34 +220,68 @@
      ])
 
 
+(defn seq-knob-rotate [katom x y then]
+  (fn [mx my]
+    (let [dx (- x mx)
+          dy (- y my)
+          r
+          (/ (* 180 (- (js/Math.atan2 dx dy)))
+             js/Math.PI)]
+      (when (<= (js/Math.abs r) 130)
+        (swap! katom assoc :deg r)
+        (when then
+          (then))))
+    ))
+
+(defn seq-knob-park [katom stepss then]
+  (fn []
+    (swap! katom assoc :rotating false)
+    (let [
+          cur   (:deg @katom)
+          dif   (vec (map (juxt identity (fn [s]
+                                           (js/Math.abs (- s cur)))) stepss))
+          min (-> (sort-by second dif) first first)]
+      ;(swap! katom assoc :deg min :val (deg->unit min))
+      (when then
+        (then (deg->unit min)))
+      )))
+
+(defn unit->range [u min max]
+  (+ min (* (- max min) u)))
+
 (defn seq-knob [x y se d]
   (let [val (:pitch (get @se (:num d)))
         min 60
         max (+ 23 60)
-        steps (calc-knob-steps (range min (inc max)) min max)]
+        stepss (calc-knob-steps (range min (inc max)) min max)
+        rotor (atom {:deg 0 :rotating false})]
 
     (fn []
       [:g.sknob.white {:transform (str "translate(" x "," y ")")}
-       (for [st steps]
+       (for [st stepss]
           ^{:key st} [:line {:x1 0 :y1 -17
                       :x2 0 :y2 -20
                       :stroke-width 1
 
                              :transform (str "rotate(" st ")")}])
 
-       [:g {:transform (str "rotate(" (-> @se (get (:num d)) :pitch (range->unit min max) unit->deg) ")")
-            :on-mouse-down (comment fn [e]
+       [:g {:transform (str "rotate(" (if (get @rotor :rotating)
+                                        (get @rotor :deg)
+                                        (-> @se (get (:num d)) :pitch (range->unit min max) unit->deg)) ")")
+            :on-mouse-down (fn [e]
+                             (println "kupa")
                              (.preventDefault e)
                              (.stopPropagation e)
+                             (swap! rotor assoc :rotating true)
                              (swap! up-listeners
                                     conj
-                                    (knob-park k (fn [z]
-                                                   (swap! steps assoc-in [(:num d) :pitch ()])
+                                    (seq-knob-park rotor  stepss (fn [z]
+                                                                   (swap! se assoc-in [(:num d) :pitch] (unit->range z min max) )
                                                   ))
                                     )
                              (swap! mouse-listeners
                                     conj
-                                    (knob-rotate k x y
+                                    (seq-knob-rotate rotor x y
                                                 nil)
                                     )
                              )}
@@ -276,7 +310,28 @@
   )
 
 (defn svg-seq-box [sqs sts]
-  [:svg.seq-box {:width 1000 :height 120}
+  [:svg.seq-box {:width 1000 :height 120
+                 :on-mouse-up (fn [e]
+                                (println "eee")
+                        (.preventDefault e)
+                        (up-broadcast)
+                        (reset! mouse-listeners #{})
+                        (reset! up-listeners #{}))
+
+         :on-mouse-move (fn [e]
+                          (.preventDefault e)
+                          (.stopPropagation e)
+                          (let [br (-> e .-target .getBoundingClientRect)
+                                x
+                                (- (.-clientX e)
+                                   (.-left br))
+                                y
+                                (- (.-clientY e)
+                                   (.-top br))]
+                            (mouse-broadcast x y)
+
+
+                            ))}
    (for [s @sts]
      ^{:key (str (:num s) "-step")} [seq-step sqs sts s])]
   )
@@ -306,7 +361,7 @@
    [control-btn "STOP SEQ" 15 145 90 30 #(s/stop clock)]
    [control-btn "RANDOMIZE" 15 180 90 30 #(for [s sequencers]
                                             (doseq [i (range 0 16)]
-                                            (swap! (get-steps) assoc-in [i :pitch] (s/pentatonic-pitch-val))))]
+                                              (swap! (get s :steps) assoc-in [i :pitch] (s/pentatonic-pitch-val))))]
    ])
 
 (defn hello-world []
@@ -315,7 +370,7 @@
    [svg-synth-box s]
    [svg-synth-box s2]
    (for [sequencer sequencers]
-      [svg-seq-box sequencer (:steps sequencer)])
+     ^{:key (str "se-view-" (rand))} [svg-seq-box sequencer (:steps sequencer)])
    ;[sequencer-block sequencer clock]
    ])
 
