@@ -2,7 +2,7 @@
   (:require [synth.audio :as a]
             [synth.instrument :as i]))
 
-(defrecord MG20 [ctx osc filt envs out]
+(defrecord MG20 [ctx master-vol osc filt envs out]
   a/Node
   (connect [self somewhere] (.connect out somewhere) self)
 
@@ -67,18 +67,20 @@
 (defn filters [ctx unit]
   (let [lowpass (a/afilter ctx :lowpass 0)
         lp-cutoff (a/knob ctx unit 0 6000)
+        env-amt   (a/tknob ctx unit 0 3000)
         lp-reso   (a/knob ctx unit 0 100)
         out       (a/gain ctx 1)]
 
     (a/setv lp-cutoff 1000)
     (a/setv lp-reso   1)
-
+    (a/wire (:out env-amt)   (.-frequency lowpass))
     (a/wire (:out lp-cutoff) (.-frequency lowpass))
     (a/wire (:out lp-reso)   (.-Q lowpass))
     (a/wire lowpass out)
 
     {:lowpass lowpass
      :cutoff lp-cutoff
+     :env-amt env-amt
      :resonance lp-reso
      :out     out}))
 
@@ -101,8 +103,13 @@
         oscs (oscillators ctx unit)
         filts (filters ctx unit)
         env1  (envelope ctx unit)
+        master-vol (a/knob ctx unit 0 1)
+
         out (a/gain ctx 0)]
+    (a/setv master-vol 0.1)
     (a/wire (:out oscs) (:lowpass filts))
     (a/wire (:out filts) out)
     (a/connect (:out env1) (.-gain out))
-    (MG20. ctx oscs filts env1 out)))
+    (a/connect (:out env1) (-> filts :env-amt :out))
+   ; (a/wire out (:out master-vol))
+    (MG20. ctx master-vol oscs filts env1 (a/*- ctx (:out master-vol) out))))
