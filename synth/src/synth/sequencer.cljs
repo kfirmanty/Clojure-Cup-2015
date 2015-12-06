@@ -9,29 +9,26 @@
   (main-loop [this]))
 
 (defprotocol Stepable
-  (step [this])
+  (step [this step-num])
   (set-step [this step]))
 
 (defn swap-step
-  [steps num]
-  (let [step (nth steps num)
-        step-rev (assoc step :note-on (not (:note-on step)))]
-    (assoc steps num step-rev)))
+  [step]
+  (assoc step :note-on (not (:note-on step))))
 
-(defrecord Sequencer [steps events synth-chan]
+(defrecord Sequencer [steps synth-chan]
   Stepable
-  (step [this]
-    (let [event (first (take 1 @events))]
-                 (if (:note-on event)
-                   (i/play synth-chan (:pitch event))
-                   (i/stop synth-chan (:pitch event)))
-             ;(put! synth-chan event)
-                 (swap! events #(rest %))))
+  (step [this step-num]
+    (let [event (nth @steps step-num)]
+      (if (:note-on @event)
+        (i/play synth-chan (:pitch @event))
+        (i/stop synth-chan (:pitch @event)))
+                                        ;(put! synth-chan event)
+      ))
   (set-step [this step]
-    (swap! steps #(swap-step % step))
-    (reset! events (-> @steps cycle))))
+    (swap! step #(swap-step %))))
 
-(defrecord Clock [sequencer interval running]
+(defrecord Clock [sequencer interval running count]
   Controlable
   (start [this]
     (swap! running (fn [] true))
@@ -39,8 +36,10 @@
 
   (main-loop [this]
     (js/setTimeout (fn []
-                      (if @running (do (step sequencer)
-                                           (main-loop this)))) interval))
+                     (if @running (do
+                                    (step sequencer @count)
+                                    (swap! count #(-> % inc (mod 16)))
+                                    (main-loop this)))) interval))
 
   (stop [this]
     (swap! running (fn [] false))))
@@ -48,10 +47,9 @@
 (defn sequencer
   ([synth-chan]
    (->Sequencer (atom [{:note-on true :pitch 69}])
-                (atom (cycle [{:note-on true :pitch 69} {:note-on false :pitch 69}]))
                 synth-chan))
   ([synth-chan steps]
-   (->Sequencer steps (atom (cycle @steps)) synth-chan)))
+   (->Sequencer steps synth-chan)))
 
 (defn clock [sequencer bpm]
-  (->Clock sequencer (/ (* 60 1000) bpm) (atom true)))
+  (->Clock sequencer (/ (* 60 1000) bpm) (atom true) (atom 0)))
