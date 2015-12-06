@@ -31,7 +31,7 @@
 (defrecord Clock [sequencer interval running count]
   Controlable
   (start [this]
-    (swap! running (fn [] true))
+    (reset! running true)
     (main-loop this))
 
   (main-loop [this]
@@ -42,7 +42,8 @@
                                     (main-loop this)))) interval))
 
   (stop [this]
-    (swap! running (fn [] false))))
+    (reset! running false)
+    (reset! count 0)))
 
 (defn sequencer
   ([synth-chan]
