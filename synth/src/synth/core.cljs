@@ -30,11 +30,47 @@
                                            (:current step) "current-step"
                                            (:note-on step) "note-on"
                                            :else "note-off")}])
+(defn knob [nam k]
+  [:div.knob
+   [:span nam]
+   [:input {:type :range
+            :min (:min k)
+            :max (:max k)
+            :step (/ (- (:max k) (:min k)) 100)
+            :defaultValue (audio/current k)
+            :on-change #(audio/setv k (-> % .-target .-value))}]])
+
+(defn module [nam & rest]
+  [:div.module
+   [:span.title nam]
+   (list rest)
+   [:div.clearfix]])
+
+(defn synthesizer [sy]
+  [:div.box
+   [:h2 "Lambda-1 Synthesizer"]
+
+   [module "Oscillators"
+    [knob "detune" (-> sy :osc :osc2-detune)]]
+
+   [module "LP Filter"
+    [knob "cutoff" (-> sy :filt :cutoff)]
+    [knob "resonance" (-> sy :filt :resonance)]]
+
+   [module "Envelope"
+    [knob "A" (-> sy :envs :a)]
+    [knob "D" (-> sy :envs :d)]
+    [knob "S" (-> sy :envs :s)]
+    [knob "R" (-> sy :envs :r)]]
+
+   [:div.clearfix]
+   ])
 
 (defn hello-world []
   [:div [:h1 (:text @app-state)]
    [:button {:on-click #(i/play s 69)} "on"]
    [:button {:on-click #(i/stop s 69)} "off"]
+   [synthesizer s]
    [:div
     [:button {:on-click #(s/start clock)} "start seq"]
     [:button {:on-click #(s/stop clock)} "stop seq"]

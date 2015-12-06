@@ -2,7 +2,7 @@
   (:require [synth.audio :as a]
             [synth.instrument :as i]))
 
-(defrecord MG20 [ctx osc envs out]
+(defrecord MG20 [ctx osc filt envs out]
   a/Node
   (connect [self somewhere] (.connect out somewhere) self)
 
@@ -78,6 +78,8 @@
     (a/wire lowpass out)
 
     {:lowpass lowpass
+     :cutoff lp-cutoff
+     :resonance lp-reso
      :out     out}))
 
 (defn envelope [ctx unit]
@@ -103,4 +105,4 @@
     (a/wire (:out oscs) (:lowpass filts))
     (a/wire (:out filts) out)
     (a/connect (:out env1) (.-gain out))
-    (MG20. ctx oscs env1 out)))
+    (MG20. ctx oscs filts env1 out)))
