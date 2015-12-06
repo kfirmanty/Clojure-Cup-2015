@@ -5,6 +5,9 @@ body {
     font-family: Helvetica, Arial, sans-serif;
     font-size: 12px;
     padding: 20px;
+
+    background-color: #efc705;
+    fill: #efc705;
 }
 
 * {
@@ -20,6 +23,11 @@ body {
 .pressed {background-color: #008188}
 .depressed {background-color: #073E51}
 
+.sequencer {
+    background-color: #efc705;
+    fill: #efc705;
+    float: left
+}
 
 .box {
     margin: 10px;

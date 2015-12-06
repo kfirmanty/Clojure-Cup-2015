@@ -193,7 +193,7 @@
 
 (defn sequencer-block [s clk]
   [:div
-   [:div
+   [:div.sequencer
     [:button {:on-click #(s/start clk)} "start seq"]
     [:button {:on-click #(s/stop clk)} "stop seq"]
     [randomize-button s]
@@ -205,9 +205,9 @@
                 :step 2
                 :defaultValue 100
                 :on-change #(s/set-bpm clk (* 4 (js/Number.parseFloat (-> % .-target .-value))))}]]]
-   [:div {:style {:float "left"}}
+   [:div.sequencer
     (for [step @(:steps s)]
-      ^{:key (:num step)} [:div {:style {:float "left"}} (step-button step)
+      ^{:key (:num step)} [:div.sequencer (step-button step)
        [:input.pknob {:type :range
                 :min 57
                 :max 81
