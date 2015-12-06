@@ -10,7 +10,8 @@
 
 (defprotocol Stepable
   (step [this step-num])
-  (toggle-step [this step]))
+  (toggle-step [this step])
+  (randomize-pitch [this]))
 
 (defn swap-step
   [step]
@@ -38,7 +39,10 @@
 
   (toggle-step [this step]
     (swap! steps assoc-in [(:num step) :note-on]
-           (-> step :note-on not))))
+           (-> step :note-on not)))
+
+  (randomize-pitch [this]
+    (swap! steps #(for [step %] (assoc step :pitch (+ 60 (* 20 (Math/random))))))))
 
 (defrecord Clock [sequencer interval running count]
   Controlable
