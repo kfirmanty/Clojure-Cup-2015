@@ -15,6 +15,10 @@ body {
     margin: 0;
 }
 
+#wrap {
+    width: 1000px;
+}
+
 
 .current-step {background-color: #C14027}
 .note-on {background-color: #008188}
@@ -77,6 +81,30 @@ svg .sknob line {
     stroke-width: 2;
 }
 
+svg .sknob.white circle {
+    fill: #fff;
+    cursor: pointer;
+}
+
+svg .sknob.white line {
+    stroke:  #fff;
+    stroke-width: 2;
+}
+
+svg .seq-but {
+    fill: #fff;
+    stroke:  #ff0;
+    stroke-width: 2;
+
+    opacity: 0.5;
+}
+
+
+svg .sknob.white .mark {
+    fill: #008188;
+}
+
+
 svg .bg {
     fill: #efc705;
 }
@@ -86,6 +114,35 @@ svg .group {
     stroke: #008188;
     stroke-width: 2;
     pointer-events: none;
+}
+
+svg .step-g {
+    fill: #073E51;
+    opacity: 0.8;
+}
+
+svg .step-g.bar {
+    fill: #073E51;
+    opacity: 0.9;
+}
+
+
+svg .step-g.note {
+    fill: #C14027;
+    stroke: #93271B;
+}
+
+svg .step-g.on {
+    fill: #fff;
+    stroke: #ff0;
+}
+
+svg rect.seq-but.note {
+    opacity: 1 !important;
+}
+
+svg.seq-box {
+    /*border: 1px solid blue;*/
 }
 
 .knob {

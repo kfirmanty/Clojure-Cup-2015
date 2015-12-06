@@ -128,8 +128,8 @@
         [:text {:x 0 :y 30 :text-anchor :middle} title]
         ])))
 
-(defn svg-box []
-  [:svg {:width 500 :height 300
+(defn svg-synth-box []
+  [:svg {:width 500 :height 230
 
          :on-mouse-up (fn [e]
                         (.preventDefault e)
@@ -182,10 +182,8 @@
    [svg-knob "DECAY" 390 50 (-> s :envs :d)]
    [svg-knob "SUSTAIN" 320 110 (-> s :envs :s)]
    [svg-knob "RELEASE" 390 110 (-> s :envs :r)]
-
-
-
    ])
+
 
 (defn randomize-button [s]
   [:button {:on-click (fn [e]
@@ -219,9 +217,71 @@
      ])
 
 
+(defn seq-knob [x y se d]
+  (let [val (:pitch (get @se (:num d)))
+        min 60
+        max (+ 23 60)
+        steps (calc-knob-steps (range min (inc max)) min max)]
+
+    (fn []
+      [:g.sknob.white {:transform (str "translate(" x "," y ")")}
+       (for [st steps]
+          ^{:key st} [:line {:x1 0 :y1 -17
+                      :x2 0 :y2 -20
+                      :stroke-width 1
+
+                             :transform (str "rotate(" st ")")}])
+
+       [:g {:transform (str "rotate(" (-> d :pitch (range->unit min max) unit->deg) ")")
+            :on-mouse-down (comment fn [e]
+                             (.preventDefault e)
+                             (.stopPropagation e)
+                             (swap! up-listeners
+                                    conj
+                                    (knob-park k (fn [z]
+                                                   (swap! steps assoc-in [(:num d) :pitch ()])
+                                                  ))
+                                    )
+                             (swap! mouse-listeners
+                                    conj
+                                    (knob-rotate k x y
+                                                nil)
+                                    )
+                             )}
+
+        [:circle {:r 15 :cx 0 :cy 0 }]
+        [:rect.mark {:x -1 :y -12 :width 3 :height 5}]]
+
+       ])))
+
+(defn seq-button [x y sq s]
+  [:rect.seq-but {:class (when (:note-on s) :note) :x x :y y :width 30 :height 30 :rx 5 :ry 5 :on-click #(s/toggle-step sq s)}])
+
+(defn seq-step [sq se s]
+  (let [i (:num s)
+        cur (:current s)
+        note (:note-on s)]
+    [:g
+     [:rect.group.step-g {:x (+ 10 (* 61 i)) :y 10 :rx 5 :ry 5 :width 55 :height 100
+                          :class (str (when note " note")
+                                      (when (= (rem i 4) 0) " bar")
+                                      (when cur " on"))}]
+     [seq-button (+ 23 (* 61 i)) 23 sq s]
+     [seq-knob (+ 38 (* 61 i)) 80 se s]
+
+     ])
+  )
+
+(defn svg-seq-box [sqs sts]
+  [:svg.seq-box {:width 1000 :height 120}
+   (for [s @sts]
+     ^{:key (str (:num s) "-step")} [seq-step sqs sts s])]
+  )
+
 (defn hello-world []
-  [:div
-   [svg-box]
+  [:div#wrap
+   [svg-synth-box]
+   [svg-seq-box sequencer steps]
    [:div
     [:button {:on-click #(i/play s 69)} "test sound"]
     [:button {:on-click #(i/stop s 69)} "panic"]]
