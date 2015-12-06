@@ -29,7 +29,7 @@
                  (swap! events #(rest %))))
   (set-step [this step]
     (swap! steps #(swap-step % step))
-    (swap! events #(-> @steps cycle))))
+    (reset! events (-> @steps cycle))))
 
 (defrecord Clock [sequencer interval running]
   Controlable
