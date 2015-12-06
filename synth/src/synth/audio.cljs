@@ -146,6 +146,9 @@
   (Knob. ctx unit min max (wire unit
                                 (gain ctx min)) (atom min)))
 
+(defn tknob [ctx unit min max]
+  (Knob. ctx unit min max (gain ctx min) (atom min)))
+
 (defn midi->hz
   ([midi] (midi->hz midi 0))
   ([midi oct]

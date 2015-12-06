@@ -69,13 +69,14 @@ svg .sknob line {
 }
 
 svg .bg {
-    fill: #EFE8DA;
+    fill: #efc705;
 }
 
 svg .group {
     fill: none;
     stroke: #008188;
     stroke-width: 2;
+    pointer-events: none;
 }
 
 .knob {

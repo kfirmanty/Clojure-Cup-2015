@@ -106,6 +106,7 @@
                                (swap! up-listeners
                                       conj
                                       (knob-park s (fn [z]
+                                                     (println title (:val z) min max)
                                                      (audio/setv kb (+ min
                                                                        (* (:val z)
                                                                           (:mul z))))))
@@ -115,6 +116,7 @@
                                     (knob-rotate s x y
                                                  (when-not (:hard opts)
                                                    (fn [z]
+
                                                      (audio/setv kb (+ min
                                                                        (* (:val z)
                                                                           (:mul z)))))))
@@ -154,6 +156,8 @@
    [:rect.group {:x 10 :y 10 :rx 5 :ry 5 :width 60 :height 210}]
    [:text.gtitle {:x 15 :y 25 } "MASTER"]
    [svg-knob "TUNE" 40 50 (-> s :osc :main-tune) [-100 0 100]]
+   [svg-knob "VOLUME" 40 110 (-> s :master-vol)]
+
 
    [:rect.group {:x 80 :y 10 :rx 5 :ry 5 :width 60 :height 210}]
    [:text.gtitle {:x 85 :y 25 } "OSC 1"]
@@ -168,6 +172,7 @@
    [:text.gtitle {:x 225 :y 25 } "LP FILTER"]
    [svg-knob "CUTOFF" 250 50 (-> s :filt :cutoff) nil]
    [svg-knob "RESO" 250 110 (-> s :filt :resonance) nil]
+   [svg-knob "ENV AMT" 250 170 (-> s :filt :env-amt) nil]
 
    [:rect.group {:x 290 :y 10 :rx 5 :ry 5 :width 130 :height 140}]
    [:text.gtitle {:x 295 :y 25 } "ENVELOPE"]
