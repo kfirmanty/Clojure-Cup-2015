@@ -16,6 +16,9 @@ body {
 .note-on {background-color: red}
 .note-off {background-color: blue}
 
+.pressed {background-color: red}
+.depressed {background-color: blue}
+
 
 .box {
     margin: 10px;

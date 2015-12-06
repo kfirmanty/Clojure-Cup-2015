@@ -62,11 +62,17 @@
    [:div.clearfix]
    ])
 
+(defn randomize-button [s]
+  [:button {:on-click (fn [e]
+                        (let [fun (if (= identity @(:transformer s)) s/randomize-step identity)]
+                          (s/step-transformer s fun)))
+            :class (if (not (= identity @(:transformer s))) "pressed" "depressed")}])
+
 (defn sequencer-block [s clk]
   [:div
     [:button {:on-click #(s/start clk)} "start seq"]
     [:button {:on-click #(s/stop clk)} "stop seq"]
-   [:button {:on-click #(s/step-transformer s s/randomize-step)} "randomize steps"]
+   [randomize-button s]
    [:button {:on-click #(s/step-transformer s identity)} "no transformation"]
    [:div
     (for [step @(:steps s)]
