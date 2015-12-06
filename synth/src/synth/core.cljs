@@ -214,10 +214,10 @@
 
 (defn hello-world []
   [:div
-   [:button {:on-click #(i/play s 69)} "on"]
-   [:button {:on-click #(i/stop s 69)} "off"]
-
    [svg-box]
+   [:div
+    [:button {:on-click #(i/play s 69)} "test sound"]
+    [:button {:on-click #(i/stop s 69)} "panic"]]
    [sequencer-block sequencer clock]])
 
 
