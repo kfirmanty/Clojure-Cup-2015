@@ -16,14 +16,22 @@
 (defonce ctx (audio/audio-context))
 (defonce s (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
 
-(defonce clock (s/clock (s/sequencer s) 1))
+(defonce steps (into [] (for [i (range 16)]
+                            {:note-on true :pitch (+ 50 (* 20 (Math/random)))})))
+(defonce sequencer (s/sequencer s steps))
+(defonce clock (s/clock sequencer 160))
 
 (defn hello-world []
   [:div [:h1 (:text @app-state)]
    [:button {:on-click #(i/play s 69)} "on"]
    [:button {:on-click #(i/stop s 69)} "off"]
-   [:button {:on-click #(s/start clock)} "start seq"]
-   [:button {:on-click #(s/stop clock)} "stop seq"]])
+   [:div
+    [:button {:on-click #(s/start clock)} "start seq"]
+    [:button {:on-click #(s/stop clock)} "stop seq"]]
+   [:div
+    (for [x (range 16)]
+      [:button {:on-click (fn []
+                            (s/set-step sequencer x))} "."])]])
 
 (reagent/render-component [hello-world]
                           (. js/document (getElementById "app")))
@@ -33,4 +41,4 @@
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
+  )
