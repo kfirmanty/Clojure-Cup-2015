@@ -82,7 +82,8 @@
 
   (stop [this]
     (reset! running false)
-    (reset! count 0))
+    (reset! count 0)
+    (js/setTimeout (fn [] (i/stop (:synth-chan sequencer) 69)) (* 2 interval)))
 
   (set-bpm [this bpm]
     (println bpm)
