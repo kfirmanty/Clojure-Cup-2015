@@ -17,25 +17,19 @@
 (defonce s (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
 
 (defonce steps (atom (into [] (for [i (range 16)]
-                                (atom {:note-on true
-                                       :pitch (+ 50 (* 20 (Math/random)))
-                                       :num i})))))
+                                {:note-on true
+                                 :pitch (+ 60 (* 20 (Math/random)))
+                                 :num i}))))
 
 (defonce sequencer (s/sequencer s steps))
 (defonce clock (s/clock sequencer (* 4 120)))
 
-(defonce step-on "#A1DAFF")
-(defonce step-off "#EEF8FF")
-
-(defn change-color [step bckg-col]
-  (reset! bckg-col (if (:note-on @step) step-on step-off)))
-
 (defn step-button [step]
-  (let [bckg-col (atom step-on)]
-      ^{:key (:num @step)} [:button {:on-click (fn [click]
-                                                (s/set-step sequencer step)
-                                                (change-color step bckg-col))
-                                    :style {:background-color @bckg-col}}]))
+  ^{:key (:num step)} [:button {:on-click #(s/toggle-step sequencer step)
+                                :class (cond
+                                           (:current step) "current-step"
+                                           (:note-on step) "note-on"
+                                           :else "note-off")}])
 
 (defn hello-world []
   [:div [:h1 (:text @app-state)]

@@ -10,23 +10,35 @@
 
 (defprotocol Stepable
   (step [this step-num])
-  (set-step [this step]))
+  (toggle-step [this step]))
 
 (defn swap-step
   [step]
   (assoc step :note-on (not (:note-on step))))
 
+(defn clear-current [steps]
+  (swap! steps (fn [old-steps]
+                 (vec
+                  (map #(assoc % :current false) old-steps)))))
+
+(defn set-in-step [steps num what to]
+  (swap! steps assoc-in [num what] to))
+
 (defrecord Sequencer [steps synth-chan]
   Stepable
   (step [this step-num]
-    (let [event @(nth @steps step-num)]
+    (let [event (nth @steps step-num)]
+      (clear-current steps)
+      (set-in-step steps step-num :current true)
       (if (:note-on event)
         (i/play synth-chan (:pitch event))
         (i/stop synth-chan (:pitch event)))
                                         ;(put! synth-chan event)
       ))
-  (set-step [this step]
-    (swap! step #(swap-step %))))
+
+  (toggle-step [this step]
+    (swap! steps assoc-in [(:num step) :note-on]
+           (-> step :note-on not))))
 
 (defrecord Clock [sequencer interval running count]
   Controlable

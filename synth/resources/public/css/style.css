@@ -1,2 +1,5 @@
 /* some style */
 
+.current-step {background-color: yellow}
+.note-on {background-color: red}
+.note-off {background-color: blue}

@@ -8,7 +8,7 @@
 
   i/Instrument
   (play [_ note]
-    (println "play" note)
+   ; (println "play" note)
                                         ;(aset osc "frequency" "value" (a/midi->hz note))
     (a/setv (:osc1-pitch osc) (a/midi->hz note (a/current (:osc1-oct osc))))
     (a/setv (:osc2-pitch osc) (a/midi->hz note (a/current (:osc2-oct osc))))
@@ -17,7 +17,7 @@
     )
 
   (stop [_ note]
-    (println "stop" note)
+   ; (println "stop" note)
     ;(aset out "gain" "value" 0)
     (a/detrigger (:out envs))
     )
