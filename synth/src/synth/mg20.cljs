@@ -25,6 +25,12 @@
   (set-prop [_ prop val]
     (println "boop" prop val)))
 
+(defn vf-switcher [t]
+  (fn [n]
+    (let [vf (get [:sawtooth :triangle :square :sine] n)]
+      (set! (.-type t) (name vf))
+      )))
+
 (defn oscillators [ctx unit]
   (let [osc1-pitch (a/knob ctx unit 0 20000)
         osc2-pitch (a/knob ctx unit 0 20000)
@@ -35,6 +41,8 @@
         pitch2      (a/+- ctx (:out osc2-pitch) (:out main-tune))
         osc1       (a/osc ctx :sawtooth 0)
         osc2       (a/osc ctx :sawtooth 0)
+        osc1-vf    (a/switch (vf-switcher osc1) 0 3)    ; :sawtooth :triangle :square
+        osc2-vf    (a/switch (vf-switcher osc2) 0 3)
         osc2-detune (a/knob ctx unit -10 10)
         osc1-gain  (a/knob ctx unit 0 1)
         osc2-gain  (a/knob ctx unit 0 1)
@@ -58,6 +66,8 @@
      :osc2-pitch  osc2-pitch
      :osc1-oct    osc1-oct
      :osc2-oct    osc2-oct
+     :osc1-vf     osc1-vf
+     :osc2-vf     osc2-vf
      :main-tune   main-tune
      :osc2-detune osc2-detune
      :osc1-gain   osc1-gain

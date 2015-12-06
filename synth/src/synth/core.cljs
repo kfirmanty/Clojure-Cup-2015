@@ -161,10 +161,12 @@
 
    [:rect.group {:x 80 :y 10 :rx 5 :ry 5 :width 60 :height 210}]
    [:text.gtitle {:x 85 :y 25 } "OSC 1"]
+   [svg-knob "WAVE" 110 50 (-> s :osc :osc1-vf) [0 1 2 3] {:hard true}]
    [svg-knob "OCTAVE" 110 170 (-> s :osc :osc1-oct) [-3 -2 -1 0 1 2 3] {:hard true}]
 
    [:rect.group {:x 150 :y 10 :rx 5 :ry 5 :width 60 :height 210}]
    [:text.gtitle {:x 155 :y 25 } "OSC 2"]
+   [svg-knob "WAVE" 180 50 (-> s :osc :osc2-vf) [0 1 2 3] {:hard true}]
    [svg-knob "DETUNE" 180 110 (-> s :osc :osc2-detune) [-10 0 10]]
    [svg-knob "OCTAVE" 180 170 (-> s :osc :osc2-oct) [-3 -2 -1 0 1 2 3] {:hard true}]
 

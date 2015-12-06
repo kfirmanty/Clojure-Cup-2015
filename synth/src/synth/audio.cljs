@@ -149,6 +149,22 @@
 (defn tknob [ctx unit min max]
   (Knob. ctx unit min max (gain ctx min) (atom min)))
 
+(defrecord Switch [min max setting upfn]
+  Setting
+  (current [_] @setting)
+
+  (setv [_ val]
+    (reset! setting val)
+    (when upfn
+      (upfn val)))
+
+  (slide-to [_ val t]
+    (println "can't slide switch"))
+  )
+
+(defn switch [f min max]
+  (Switch. min max (atom min) f))
+
 (defn midi->hz
   ([midi] (midi->hz midi 0))
   ([midi oct]
