@@ -302,9 +302,9 @@
    [control-btn "PANIC" 15 75 90 30 #(i/stop s 60)]
    [control-btn "START SEQ" 15 110 90 30 #(s/start clock)]
    [control-btn "STOP SEQ" 15 145 90 30 #(s/stop clock)]
-   [control-btn "RANDOMIZE" 15 180 90 30 #(for [s sequencers]
+   [control-btn "RANDOMIZE" 15 180 90 30 #(doseq [s sequencers]
                                             (doseq [i (range 0 16)]
-                                            (swap! (get-steps) assoc-in [i :pitch] (s/pentatonic-pitch-val))))]
+                                            (swap! (:steps s) assoc-in [i :pitch] (s/pentatonic-pitch-val))))]
    ])
 
 (defn hello-world []
