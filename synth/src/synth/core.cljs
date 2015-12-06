@@ -11,16 +11,17 @@
 
 (defonce ctx (audio/audio-context))
 (defonce s (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
+(defonce s2 (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
 
-(defonce steps (atom (into [] (for [i (range 16)]
-                                {:note-on true
-                                 :pitch (s/pentatonic-pitch-val)
-                                 :num i}))))
+(defn get-steps [] (atom (into [] (for [i (range 16)]
+                                    {:note-on true
+                                     :pitch (s/pentatonic-pitch-val)
+                                     :num i}))))
 
-(defonce sequencer (s/sequencer s steps))
-(defonce clock (s/clock sequencer (* 4 100)))
+(defonce sequencers [(s/sequencer s (get-steps)) (s/sequencer s2 (get-steps))])
+(defonce clock (s/clock sequencers (* 4 100)))
 
-(defn step-button [step]
+(defn step-button [step sequencer]
   [:button {:on-click #(s/toggle-step sequencer step)
                                 :class (cond
                                            (:current step) "current-step"
@@ -191,29 +192,31 @@
                           (s/step-transformer s fun)))
             :class (if (not (= identity @(:transformer s))) "pressed" "depressed")}])
 
-(defn sequencer-block [s clk]
+(defn sequencer-block [clk]
   [:div
    [:div.sequencer
-    [:button {:on-click #(s/start clk)} "start seq"]
-    [:button {:on-click #(s/stop clk)} "stop seq"]
-    [randomize-button s]
-     [:div.sknob
+       [:div.sknob
        [:span "BPM"]
        [:input {:type :range
                 :min 1
                 :max 200
                 :step 2
                 :defaultValue 100
-                :on-change #(s/set-bpm clk (* 4 (js/Number.parseFloat (-> % .-target .-value))))}]]]
-   [:div.sequencer
-    (for [step @(:steps s)]
-      ^{:key (:num step)} [:div.sequencer (step-button step)
-       [:input.pknob {:type :range
-                :min 57
-                :max 81
-                :step 1
-                :defaultValue (:pitch step)
-                      :on-change #(s/set-step-pitch s step (js/Number.parseFloat (-> % .-target .-value)))}]])]
+                :on-change #(s/set-bpm clk (* 4 (js/Number.parseFloat (-> % .-target .-value))))}]]
+    [:button {:on-click #(s/start clk)} "start seq"]
+    [:button {:on-click #(s/stop clk)} "stop seq"]]
+
+   (for [s sequencers]
+     [:div.sequencer [randomize-button s]
+      [:div.sequencer
+       (for [step @(:steps s)]
+         ^{:key (:num step)} [:div.sequencer (step-button step s)
+                              [:input.pknob {:type :range
+                                             :min 57
+                                             :max 81
+                                             :step 1
+                                             :defaultValue (:pitch step)
+                                             :on-change #(s/set-step-pitch s step (js/Number.parseFloat (-> % .-target .-value)))}]])]])
      ])
 
 
@@ -299,8 +302,9 @@
    [control-btn "PANIC" 15 75 90 30 #(i/stop s 60)]
    [control-btn "START SEQ" 15 110 90 30 #(s/start clock)]
    [control-btn "STOP SEQ" 15 145 90 30 #(s/stop clock)]
-   [control-btn "RANDOMIZE" 15 180 90 30 #(doseq [i (range 0 16)]
-                                            (swap! steps assoc-in [i :pitch] (s/pentatonic-pitch-val)))]
+   [control-btn "RANDOMIZE" 15 180 90 30 #(for [s sequencers]
+                                            (doseq [i (range 0 16)]
+                                            (swap! (get-steps) assoc-in [i :pitch] (s/pentatonic-pitch-val))))]
    ])
 
 (defn hello-world []
@@ -308,12 +312,10 @@
    [svg-control-box]
    [svg-synth-box]
    [svg-synth-box]
-   [svg-seq-box sequencer steps]
-
+   (for [sequencer sequencers]
+      [svg-seq-box sequencer (:steps sequencer)])
    ;[sequencer-block sequencer clock]
    ])
-
-
 
 (reagent/render-component [hello-world]
                           (. js/document (getElementById "app")))
