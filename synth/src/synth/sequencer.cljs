@@ -13,6 +13,9 @@
   (toggle-step [this step])
   (randomize-pitch [this]))
 
+(defn random-pitch-val []
+  (+ 60 (* 20 (Math/random))))
+
 (defn swap-step
   [step]
   (assoc step :note-on (not (:note-on step))))
@@ -42,7 +45,7 @@
            (-> step :note-on not)))
 
   (randomize-pitch [this]
-    (swap! steps #(for [step %] (assoc step :pitch (+ 60 (* 20 (Math/random))))))))
+    (swap! steps #(for [step %] (assoc step :pitch (random-pitch-val))))))
 
 (defrecord Clock [sequencer interval running count]
   Controlable

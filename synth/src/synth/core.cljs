@@ -18,7 +18,7 @@
 
 (defonce steps (atom (into [] (for [i (range 16)]
                                 {:note-on true
-                                 :pitch (+ 60 (* 20 (Math/random)))
+                                 :pitch (s/random-pitch-val)
                                  :num i}))))
 
 (defonce sequencer (s/sequencer s steps))
