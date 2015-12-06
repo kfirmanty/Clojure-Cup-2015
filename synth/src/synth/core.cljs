@@ -17,17 +17,25 @@
 (defonce s (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
 
 (defonce steps (atom (into [] (for [i (range 16)]
-                                {:note-on true
-                                 :pitch (+ 50 (* 20 (Math/random)))
-                                 :num i}))))
+                                (atom {:note-on true
+                                       :pitch (+ 50 (* 20 (Math/random)))
+                                       :num i})))))
 
 (defonce sequencer (s/sequencer s steps))
 (defonce clock (s/clock sequencer (* 4 120)))
 
+(defonce step-on "#A1DAFF")
+(defonce step-off "#EEF8FF")
+
+(defn change-color [step bckg-col]
+  (reset! bckg-col (if (:note-on @step) step-on step-off)))
+
 (defn step-button [step]
-  [:button {:on-click (fn []
-                        (s/set-step sequencer (:num step)))
-            :key (:num step)} "."])
+  (let [bckg-col (atom step-on)]
+      ^{:key (:num @step)} [:button {:on-click (fn [click]
+                                                (s/set-step sequencer step)
+                                                (change-color step bckg-col))
+                                    :style {:background-color @bckg-col}}]))
 
 (defn hello-world []
   [:div [:h1 (:text @app-state)]
@@ -37,8 +45,8 @@
     [:button {:on-click #(s/start clock)} "start seq"]
     [:button {:on-click #(s/stop clock)} "stop seq"]]
    [:div
-    (for [step @steps]
-        (step-button step))]])
+    (doall (for [step @steps]
+             (step-button step)))]])
 
 (reagent/render-component [hello-world]
                           (. js/document (getElementById "app")))
