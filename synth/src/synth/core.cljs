@@ -11,13 +11,14 @@
 
 (defonce ctx (audio/audio-context))
 (defonce s (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
+(defonce s2 (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
 
 (defn get-steps [] (atom (into [] (for [i (range 16)]
                                     {:note-on true
                                      :pitch (s/pentatonic-pitch-val)
                                      :num i}))))
 
-(defonce sequencers [(s/sequencer s (get-steps)) (s/sequencer s (get-steps))])
+(defonce sequencers [(s/sequencer s (get-steps)) (s/sequencer s2 (get-steps))])
 (defonce clock (s/clock sequencers (* 4 100)))
 
 (defn step-button [step sequencer]
