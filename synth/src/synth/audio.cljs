@@ -106,11 +106,11 @@
 
   (detrigger [_]
     (let [rr (current r)]
-      (println "detrigger" (.-currentTime ctx) rr)
+     ; (println "detrigger" (.-currentTime ctx) rr)
       (let [t (.-currentTime ctx)]
         (.cancelScheduledValues (.-gain out) t)
         (.setValueAtTime (.-gain out) (.-value (.-gain out)) t)
-        (println (+ t rr))
+     ;   (println (+ t rr))
         (.linearRampToValueAtTime (.-gain out) 0 (+ t rr))
 
         ))))
