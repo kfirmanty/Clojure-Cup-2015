@@ -94,7 +94,7 @@
 
   Triggered
   (trigger [_]
-    (println "trigger" a (current d) s (current r))
+    ;(println "trigger" a (current d) s (current r))
     (let [t (.-currentTime ctx)]
       (doto (.-gain out)
        ; (.cancelScheduledValues t)
@@ -105,7 +105,7 @@
     )
 
   (detrigger [_]
-    (println "detrigger")
+    ;(println "detrigger")
     (let [t (.-currentTime ctx)]
       (.cancelScheduledValues (.-gain out) t)
       (.setValueAtTime (.-gain out) (.-value (.-gain out)) t)
