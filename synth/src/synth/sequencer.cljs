@@ -60,14 +60,13 @@
            (-> step :note-on not)))
 
   (set-step-pitch [this step pitch]
-    (println pitch)
     (swap! steps assoc-in [(:num step) :pitch] pitch))
 
   (randomize-pitch [this]
     (swap! steps #(for [step %] (assoc step :pitch (random-pitch-val)))))
   (step-transformer [this new-transformer] (reset! transformer new-transformer)))
 
-(defrecord Clock [sequencer interval running count]
+(defrecord Clock [sequencers interval running count]
   Controlable
   (start [this]
     (reset! running true)
@@ -76,17 +75,19 @@
   (main-loop [this]
     (js/setTimeout (fn []
                      (if @running (do
-                                    (step sequencer @count)
+                                    (doseq [sequencer sequencers]
+                                      (step sequencer @count))
                                     (swap! count #(-> % inc (mod 16)))
                                     (main-loop this)))) @interval))
 
   (stop [this]
     (reset! running false)
     (reset! count 0)
-    (js/setTimeout (fn [] (i/stop (:synth-chan sequencer) 69)) (* 2 interval)))
+    (js/setTimeout (fn [] (doseq [sequencer sequencers]
+                           (i/stop (:synth-chan sequencer) 69)))
+                   (* 2 interval)))
 
   (set-bpm [this bpm]
-    (println bpm)
     (reset! interval (bpm-to-ms bpm))))
 
 (defn sequencer
@@ -96,5 +97,5 @@
   ([synth-chan steps]
    (->Sequencer steps synth-chan (atom identity))))
 
-(defn clock [sequencer bpm]
-  (->Clock sequencer (atom (bpm-to-ms bpm)) (atom true) (atom 0)))
+(defn clock [sequencers bpm]
+  (->Clock sequencers (atom (bpm-to-ms bpm)) (atom true) (atom 0)))
