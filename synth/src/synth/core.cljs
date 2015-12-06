@@ -7,7 +7,7 @@
 
 (enable-console-print!)
 
-(println "Edits to this text should show up in your developer console.")
+
 
 (defonce ctx (audio/audio-context))
 (defonce s (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
@@ -129,7 +129,7 @@
         ])))
 
 (defn svg-synth-box []
-  [:svg {:width 500 :height 230
+  [:svg {:width 440 :height 230
 
          :on-mouse-up (fn [e]
                         (.preventDefault e)
@@ -278,14 +278,40 @@
      ^{:key (str (:num s) "-step")} [seq-step sqs sts s])]
   )
 
+(defn control-btn [title x y w h f]
+  (let [active (atom false)]
+    (fn []
+      [:g.ctl-btn {:class (when @active :push)
+                   :transform (str "translate(" x "," y ")")
+                   :on-click f}
+
+       [:rect {:x 0 :y 0 :width w :height h :rx 5 :ry 5}]
+       [:text {:x (/ w 2) :y (* h 0.6) :text-anchor :middle} title]
+       ]
+      ))
+  )
+
+(defn svg-control-box []
+  [:svg {:width 120 :height 230}
+   [:rect.group.red {:x 10 :y 10 :rx 5 :ry 5 :width 100 :height 210}]
+   [:text.gtitle.red {:x 15 :y 25 } "CONTROL"]
+   [control-btn "TEST SOUND" 15 40 90 30 #(i/play s 60)]
+   [control-btn "PANIC" 15 75 90 30 #(i/stop s 60)]
+   [control-btn "START SEQ" 15 110 90 30 #(s/start clock)]
+   [control-btn "STOP SEQ" 15 145 90 30 #(s/stop clock)]
+   [control-btn "RANDOMIZE" 15 180 90 30 #(doseq [i (range 0 16)]
+                                            (swap! steps assoc-in [i :pitch] (s/pentatonic-pitch-val)))]
+   ])
+
 (defn hello-world []
   [:div#wrap
+   [svg-control-box]
+   [svg-synth-box]
    [svg-synth-box]
    [svg-seq-box sequencer steps]
-   [:div
-    [:button {:on-click #(i/play s 69)} "test sound"]
-    [:button {:on-click #(i/stop s 69)} "panic"]]
-   [sequencer-block sequencer clock]])
+
+   ;[sequencer-block sequencer clock]
+   ])
 
 
 

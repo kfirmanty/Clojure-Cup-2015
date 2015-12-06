@@ -8,6 +8,7 @@ body {
 
     background-color: #efc705;
     fill: #efc705;
+    text-align: center;
 }
 
 * {
@@ -15,9 +16,18 @@ body {
     margin: 0;
 }
 
+#app {
+    width:1000px;
+    margin: 0 auto;
+    text-align: left;
+}
+
 #wrap {
     width: 1000px;
+    margin: 0 auto;
 }
+
+
 
 
 .current-step {background-color: #C14027}
@@ -132,6 +142,15 @@ svg .step-g.note {
     stroke: #93271B;
 }
 
+.gtitle.red {
+    fill: #93271B;
+}
+
+.group.red {
+    stroke: #93271B;
+}
+
+
 svg .step-g.on {
     fill: #fff;
     stroke: #ff0;
@@ -143,6 +162,24 @@ svg rect.seq-but.note {
 
 svg.seq-box {
     /*border: 1px solid blue;*/
+}
+
+svg .ctl-btn rect {
+    fill:  #C14027;
+    cursor: pointer;
+}
+
+svg .ctl-btn text {
+    font-size: 13px;
+    fill: white;
+    pointer-events: none;
+    font-family: 'Roboto Condensed', Helvetica, sans-serif;
+        -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select:none;
 }
 
 .knob {
