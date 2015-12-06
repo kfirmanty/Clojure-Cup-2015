@@ -188,26 +188,28 @@
 
 (defn sequencer-block [s clk]
   [:div
+   [:div
     [:button {:on-click #(s/start clk)} "start seq"]
     [:button {:on-click #(s/stop clk)} "stop seq"]
-   [randomize-button s]
-   [:div
-    (for [step @(:steps s)]
-      ^{:key (:num step)} [:div (step-button step)
-       [:input.pknob {:type :range
-                :min 57
-                :max 81
-                :step 1
-                :defaultValue (:pitch step)
-                      :on-change #(s/set-step-pitch s step (js/Number.parseFloat (-> % .-target .-value)))}]])]
-      [:div.knob
+    [randomize-button s]
+     [:div.sknob
        [:span "BPM"]
        [:input {:type :range
                 :min 1
                 :max 200
                 :step 2
                 :defaultValue 100
-                :on-change #(s/set-bpm clk (* 4 (js/Number.parseFloat (-> % .-target .-value))))}]]])
+                :on-change #(s/set-bpm clk (* 4 (js/Number.parseFloat (-> % .-target .-value))))}]]]
+   [:div {:style {:float "left"}}
+    (for [step @(:steps s)]
+      ^{:key (:num step)} [:div {:style {:float "left"}} (step-button step)
+       [:input.pknob {:type :range
+                :min 57
+                :max 81
+                :step 1
+                :defaultValue (:pitch step)
+                      :on-change #(s/set-step-pitch s step (js/Number.parseFloat (-> % .-target .-value)))}]])]
+     ])
 
 
 (defn hello-world []
@@ -216,9 +218,7 @@
    [:button {:on-click #(i/stop s 69)} "off"]
 
    [svg-box]
-
-   [sequencer-block sequencer clock]
-])
+   [sequencer-block sequencer clock]])
 
 
 
