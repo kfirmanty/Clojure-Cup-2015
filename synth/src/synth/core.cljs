@@ -74,7 +74,7 @@
    [:div
     [:button {:on-click #(s/start clock)} "start seq"]
     [:button {:on-click #(s/stop clock)} "stop seq"]
-    [:button {:on-click #(s/randomize-pitch sequencer)} "randomize"]]
+    [:button {:on-click #(s/step-transformer sequencer s/randomize-step)} "randomize"]]
    [:div
     (for [step @steps]
       (step-button step))]])
