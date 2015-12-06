@@ -57,7 +57,7 @@
         out       (a/gain ctx 1)]
 
     (a/setv lp-cutoff 1000)
-    (a/setv lp-reso   30)
+    (a/setv lp-reso   10)
 
     (a/wire (:out lp-cutoff) (.-frequency lowpass))
     (a/wire (:out lp-reso)   (.-Q lowpass))

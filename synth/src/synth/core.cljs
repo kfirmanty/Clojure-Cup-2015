@@ -19,7 +19,7 @@
 (defonce steps (into [] (for [i (range 16)]
                             {:note-on true :pitch (+ 50 (* 20 (Math/random)))})))
 (defonce sequencer (s/sequencer s steps))
-(defonce clock (s/clock sequencer 160))
+(defonce clock (s/clock sequencer (* 4 120)))
 
 (defn hello-world []
   [:div [:h1 (:text @app-state)]
