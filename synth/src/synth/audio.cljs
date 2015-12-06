@@ -90,21 +90,25 @@
 
 (defrecord ADSR [ctx unit a d s r out]
   Node
-  (connect [self somewhere] (.connect out somewhere))
+  (connect [self somewhere] (.connect out somewhere) self)
 
   Triggered
   (trigger [_]
+    (println "trigger" a (current d) s (current r))
     (let [t (.-currentTime ctx)]
       (doto (.-gain out)
-        (.cancelScheduledValues t)
+       ; (.cancelScheduledValues t)
         (.setValueAtTime 0 t)
+        (.setValueAtTime (.-value (.-gain out)) t)
         (.linearRampToValueAtTime 1 (+ t (current a)))
         (.linearRampToValueAtTime (current s) (+ t (current a) (current d)))))
     )
 
   (detrigger [_]
+    (println "detrigger")
     (let [t (.-currentTime ctx)]
       (.cancelScheduledValues (.-gain out) t)
+      (.setValueAtTime (.-gain out) (.-value (.-gain out)) t)
       (.linearRampToValueAtTime (.-gain out) 0 (+ t (current r))))))
 
 (defn adsr [ctx unit a d s r]
@@ -116,23 +120,29 @@
         (> val max) max
         :else       val))
 
-(defrecord Knob [ctx unit min max out]
+(defrecord Knob [ctx unit min max out dummy]
   Node
   (connect [self somewhere] (.connect out somewhere))
 
   Setting
-  (current [_] (-> out .-gain .-value))
-  (setv [_ val] (.setValueAtTime (.-gain out)
+  (current [_] @dummy)
+  (setv [_ val]
+    (reset! dummy (clip val min max))
+    (.setValueAtTime (.-gain out)
                                     (clip val min max)
                                     (.-currentTime ctx)))
-  (slide-to [_ val t] (.linearRampToValueAtTime (.-gain out)
+  (slide-to [_ val t]
+    (reset! dummy (clip val min max))
+    (.linearRampToValueAtTime (.-gain out)
                                                 (clip val min max)
                                                 (+ (.-currentTime ctx) t)))
   )
 
 (defn knob [ctx unit min max]
   (Knob. ctx unit min max (wire unit
-                                (gain ctx min))))
+                                (gain ctx min)) (atom min)))
 
-(defn midi->hz [midi]
-  (* 440 (js/Math.pow 2.0 (/ (- midi 69) 12))))
+(defn midi->hz
+  ([midi] (midi->hz midi 0))
+  ([midi oct]
+   (* 440 (js/Math.pow 2.0 (/ (- (+ (* 12 oct) midi) 69) 12)))))
