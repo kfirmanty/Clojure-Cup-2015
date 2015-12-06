@@ -182,6 +182,14 @@ svg .ctl-btn text {
     user-select:none;
 }
 
+svg .ctl-btn.push rect {
+    fill:  white;
+}
+
+svg .ctl-btn.push text {
+    fill: #C14027;
+}
+
 .knob {
     width: 120px;
     float: left;
