@@ -9,10 +9,6 @@
 
 (println "Edits to this text should show up in your developer console.")
 
-;; define your app data so that it doesn't get over-written on reload
-
-(defonce app-state (atom {:text "Hello world!"}))
-
 (defonce ctx (audio/audio-context))
 (defonce s (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
 
@@ -84,7 +80,7 @@
                 :on-change #(s/set-bpm clk (* 4 (js/Number.parseFloat (-> % .-target .-value))))}]]])
 
 (defn hello-world []
-  [:div [:h1 (:text @app-state)]
+  [:div
    [:button {:on-click #(i/play s 69)} "on"]
    [:button {:on-click #(i/stop s 69)} "off"]
    [synthesizer s]
