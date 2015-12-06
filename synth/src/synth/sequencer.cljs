@@ -1,6 +1,7 @@
 (ns synth.sequencer
   (:require [cljs.core.async :refer [put!]]
-             [synth.instrument :as i]))
+            [synth.instrument :as i]
+            [reagent.core :as reagent :refer [atom]]))
 
 (defprotocol Controlable
   (start [this])
@@ -50,7 +51,7 @@
                 (atom (cycle [{:note-on true :pitch 69} {:note-on false :pitch 69}]))
                 synth-chan))
   ([synth-chan steps]
-   (->Sequencer (atom steps) (atom (cycle steps)) synth-chan)))
+   (->Sequencer steps (atom (cycle @steps)) synth-chan)))
 
 (defn clock [sequencer bpm]
   (->Clock sequencer (/ (* 60 1000) bpm) (atom true)))

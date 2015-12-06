@@ -16,10 +16,18 @@
 (defonce ctx (audio/audio-context))
 (defonce s (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
 
-(defonce steps (into [] (for [i (range 16)]
-                            {:note-on true :pitch (+ 50 (* 20 (Math/random)))})))
+(defonce steps (atom (into [] (for [i (range 16)]
+                                {:note-on true
+                                 :pitch (+ 50 (* 20 (Math/random)))
+                                 :num i}))))
+
 (defonce sequencer (s/sequencer s steps))
 (defonce clock (s/clock sequencer (* 4 120)))
+
+(defn step-button [step]
+  [:button {:on-click (fn []
+                        (s/set-step sequencer (:num step)))
+            :key (:num step)} "."])
 
 (defn hello-world []
   [:div [:h1 (:text @app-state)]
@@ -29,9 +37,8 @@
     [:button {:on-click #(s/start clock)} "start seq"]
     [:button {:on-click #(s/stop clock)} "stop seq"]]
    [:div
-    (for [x (range 16)]
-      [:button {:on-click (fn []
-                            (s/set-step sequencer x))} "."])]])
+    (doall (for [step @steps]
+             (step-button step)))]])
 
 (reagent/render-component [hello-world]
                           (. js/document (getElementById "app")))
