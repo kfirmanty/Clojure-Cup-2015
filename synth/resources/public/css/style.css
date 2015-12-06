@@ -11,6 +11,7 @@ body {
     margin: 0;
 }
 
+
 .current-step {background-color: yellow}
 .note-on {background-color: red}
 .note-off {background-color: blue}
@@ -21,6 +22,7 @@ body {
     padding: 10px;
     background-color: #ccc;
     border-radius: 3px;
+    width:700px;
 }
 
 .knob {

@@ -105,11 +105,15 @@
     )
 
   (detrigger [_]
-    ;(println "detrigger")
-    (let [t (.-currentTime ctx)]
-      (.cancelScheduledValues (.-gain out) t)
-      (.setValueAtTime (.-gain out) (.-value (.-gain out)) t)
-      (.linearRampToValueAtTime (.-gain out) 0 (+ t (current r))))))
+    (let [rr (current r)]
+      (println "detrigger" (.-currentTime ctx) rr)
+      (let [t (.-currentTime ctx)]
+        (.cancelScheduledValues (.-gain out) t)
+        (.setValueAtTime (.-gain out) (.-value (.-gain out)) t)
+        (println (+ t rr))
+        (.linearRampToValueAtTime (.-gain out) 0 (+ t rr))
+
+        ))))
 
 (defn adsr [ctx unit a d s r]
   (ADSR. ctx unit a d s r (wire unit

@@ -83,10 +83,10 @@
      :out     out}))
 
 (defn envelope [ctx unit]
-  (let [ak   (a/knob ctx unit 0 10)
-        dk   (a/knob ctx unit 0 10)
+  (let [ak   (a/knob ctx unit 0 1)
+        dk   (a/knob ctx unit 0 1)
         sk   (a/knob ctx unit 0 1)
-        rk   (a/knob ctx unit 0 10)
+        rk   (a/knob ctx unit 0 1)
         env1 (a/adsr ctx unit ak dk sk rk)]
 
     (a/setv sk 0.5)

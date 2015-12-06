@@ -31,14 +31,14 @@
                                            (:note-on step) "note-on"
                                            :else "note-off")}])
 (defn knob [nam k]
-  [:div.knob
-   [:span nam]
-   [:input {:type :range
-            :min (:min k)
-            :max (:max k)
-            :step (/ (- (:max k) (:min k)) 100)
-            :defaultValue (audio/current k)
-            :on-change #(audio/setv k (-> % .-target .-value))}]])
+   [:div.knob
+       [:span nam]
+       [:input {:type :range
+                :min (:min k)
+                :max (:max k)
+                :step (/ (- (:max k) (:min k)) 100)
+                :defaultValue (audio/current k)
+                :on-change #(audio/setv k (js/Number.parseFloat (-> % .-target .-value)))}]])
 
 (defn module [nam & rest]
   [:div.module
@@ -75,9 +75,9 @@
     [:button {:on-click #(s/start clock)} "start seq"]
     [:button {:on-click #(s/stop clock)} "stop seq"]
     [:button {:on-click #(s/randomize-pitch sequencer)} "randomize"]]
-      [:div
-    (doall (for [step @steps]
-             (step-button step)))]])
+   [:div
+    (for [step @steps]
+      (step-button step))]])
 
 (reagent/render-component [hello-world]
                           (. js/document (getElementById "app")))
