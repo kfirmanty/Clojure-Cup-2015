@@ -245,3 +245,33 @@ button {
     min-width: 20px;
     padding: 3px;
 }
+
+div#footer {
+    width:1000px;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+div.column {
+    width: 400px;
+    margin-right: 20px;
+    text-align: left;
+    font-family: 'Roboto Condensed', Helvetica, sans-serif;
+    font-size: 13px;
+    float: left;
+    padding-left: 10px
+}
+
+div.column li {
+    list-style-type: none;
+    padding-top: 5px;
+}
+
+div.column p {
+    text-align: justify;
+    padding-top: 5px;
+}
+
+a {
+    color: #93271B;
+}
