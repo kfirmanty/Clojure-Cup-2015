@@ -129,7 +129,7 @@
         [:text {:x 0 :y 30 :text-anchor :middle} title]
         ])))
 
-(defn svg-synth-box []
+(defn svg-synth-box [s]
   [:svg {:width 440 :height 230
 
          :on-mouse-up (fn [e]
@@ -310,8 +310,8 @@
 (defn hello-world []
   [:div#wrap
    [svg-control-box]
-   [svg-synth-box]
-   [svg-synth-box]
+   [svg-synth-box s]
+   [svg-synth-box s2]
    (for [sequencer sequencers]
       [svg-seq-box sequencer (:steps sequencer)])
    ;[sequencer-block sequencer clock]
