@@ -64,6 +64,10 @@ svg .sknob circle {
     cursor: pointer;
 }
 
+svg .sknob line {
+    stroke:  #008188;
+}
+
 svg .bg {
     fill: #EFE8DA;
 }

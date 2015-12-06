@@ -26,48 +26,18 @@
                                            (:current step) "current-step"
                                            (:note-on step) "note-on"
                                            :else "note-off")}])
-(defn knob [nam k]
-   [:div.knob
-       [:span nam]
-       [:input {:type :range
-                :min (:min k)
-                :max (:max k)
-                :step (/ (- (:max k) (:min k)) 100)
-                :defaultValue (audio/current k)
-                :on-change #(audio/setv k (js/Number.parseFloat (-> % .-target .-value)))}]])
-
-(defn module [nam & rest]
-  [:div.module
-   [:span.title nam]
-   (list rest)
-   [:div.clearfix]])
-
-(defn synthesizer [sy]
-  [:div.box
-   [:h2 "Lambda-1 Synthesizer"]
-
-   [module "Oscillators"
-    [knob "detune" (-> sy :osc :osc2-detune)]]
-
-   [module "LP Filter"
-    [knob "cutoff" (-> sy :filt :cutoff)]
-    [knob "resonance" (-> sy :filt :resonance)]]
-
-   [module "Envelope"
-    [knob "A" (-> sy :envs :a)]
-    [knob "D" (-> sy :envs :d)]
-    [knob "S" (-> sy :envs :s)]
-    [knob "R" (-> sy :envs :r)]]
-
-   [:div.clearfix]
-   ])
 
 
-(defonce mouse-listeners (atom {:pos #{}}))
+(defonce mouse-listeners (atom #{}))
+(defonce up-listeners (atom #{}))
 
 (defn mouse-broadcast [x y]
   (doseq [f @mouse-listeners]
     (f x y)))
+
+(defn up-broadcast []
+  (doseq [f @up-listeners]
+    (f)))
 
 (defn deg->unit [d]
   (/ (+ 130 d)
@@ -93,41 +63,78 @@
           (then @katom))))
     ))
 
+(defn knob-park [katom then]
+  (fn []
+    (let [steps (:steps @katom)
+          cur   (:deg @katom)
+          dif   (vec (map (juxt identity (fn [s]
+                                           (js/Math.abs (- s cur)))) steps))
+          min (-> (sort-by second dif) first first)]
+      (swap! katom assoc :deg min :val (deg->unit min))
+      (when then
+        (then @katom))
+      )))
+
+(defn calc-knob-steps [notches min max]
+  (when notches
+    (vec (map (fn [n]
+                (-> n (range->unit min max) unit->deg)) notches))))
 
 
-(defn svg-knob [title x y kb notches]
+(defn svg-knob [title x y kb notches opts]
   (let [val (audio/current kb)
         min (:min kb)
         max (:max kb)
+        steps (calc-knob-steps notches min max)
         s (atom {:val (range->unit val min max)
                  :deg (-> val (range->unit min max) unit->deg)
-                 :mul (- max min)})]
+                 :mul (- max min)
+                 :steps steps})]
     (fn []
       [:g.sknob {:transform (str "translate(" x "," y ")")}
+       (for [st steps]
+          [:line {:x1 0 :y1 -17
+                  :x2 0 :y2 -20
+                  :stroke-width 1
+
+                  :transform (str "rotate(" st ")")}])
        [:g {:transform (str "rotate(" (:deg @s) ")")
-            :onclick (fn [e] (println "kek" e))
-            :on-mouse-down (fn [e] (println "kek" e)
+            :on-mouse-down (fn [e]
                              (.preventDefault e)
                              (.stopPropagation e)
+                             (when (:hard opts)
+                               (swap! up-listeners
+                                      conj
+                                      (knob-park s (fn [z]
+                                                     (audio/setv kb (+ min
+                                                                       (* (:val z)
+                                                                          (:mul z))))))
+                                      ))
                              (swap! mouse-listeners
                                     conj
                                     (knob-rotate s x y
-                                                 (fn [z]
-                                                   (audio/setv kb (+ min
-                                                                     (* (:val z)
-                                                                        (:mul z))))))
+                                                 (when-not (:hard opts)
+                                                   (fn [z]
+                                                     (audio/setv kb (+ min
+                                                                       (* (:val z)
+                                                                          (:mul z)))))))
                                     )
                              )}
+
         [:circle {:r 15 :cx 0 :cy 0 }]
         [:rect {:x -1 :y -12 :width 3 :height 5 :style {:fill "#fff"}}]]
-       [:text {:x 0 :y 30 :text-anchor :middle} title]
+        [:text {:x 0 :y 30 :text-anchor :middle} title]
         ])))
 
 (defn svg-box []
   [:svg {:width 500 :height 300
+
          :on-mouse-up (fn [e]
                         (.preventDefault e)
-                        (reset! mouse-listeners #{}))
+                        (up-broadcast)
+                        (reset! mouse-listeners #{})
+                        (reset! up-listeners #{}))
+
          :on-mouse-move (fn [e]
                           (.preventDefault e)
                           (.stopPropagation e)
@@ -146,16 +153,16 @@
 
    [:rect.group {:x 10 :y 10 :rx 5 :ry 5 :width 60 :height 210}]
    [:text.gtitle {:x 15 :y 25 } "MASTER"]
-   [svg-knob "TUNE" 40 50 (-> s :osc :main-tune)]
+   [svg-knob "TUNE" 40 50 (-> s :osc :main-tune) [-100 0 100]]
 
    [:rect.group {:x 80 :y 10 :rx 5 :ry 5 :width 60 :height 210}]
    [:text.gtitle {:x 85 :y 25 } "OSC 1"]
-   [svg-knob "OCTAVE" 110 170 (-> s :osc :osc1-oct)]
+   [svg-knob "OCTAVE" 110 170 (-> s :osc :osc1-oct) [-3 -2 -1 0 1 2 3] {:hard true}]
 
    [:rect.group {:x 150 :y 10 :rx 5 :ry 5 :width 60 :height 210}]
    [:text.gtitle {:x 155 :y 25 } "OSC 2"]
-   [svg-knob "DETUNE" 180 110 (-> s :osc :osc2-detune)]
-   [svg-knob "OCTAVE" 180 170 (-> s :osc :osc2-oct)]
+   [svg-knob "DETUNE" 180 110 (-> s :osc :osc2-detune) [-10 0 10]]
+   [svg-knob "OCTAVE" 180 170 (-> s :osc :osc2-oct) [-3 -2 -1 0 1 2 3] {:hard true}]
 
    [:rect.group {:x 220 :y 10 :rx 5 :ry 5 :width 60 :height 210}]
    [:text.gtitle {:x 225 :y 25 } "LP FILTER"]
@@ -196,7 +203,6 @@
   [:div
    [:button {:on-click #(i/play s 69)} "on"]
    [:button {:on-click #(i/stop s 69)} "off"]
-   [synthesizer s]
 
    [svg-box]
 
