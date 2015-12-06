@@ -45,7 +45,7 @@
     (a/setv osc1-gain 1)
     (a/setv osc2-gain 1)
 
-    (a/setv osc2-oct 0)
+    (a/setv osc1-oct 0)
     (a/setv osc2-oct -1)
 
     (a/wire pitch1 (.-frequency osc1))
@@ -66,7 +66,7 @@
 
 (defn filters [ctx unit]
   (let [lowpass (a/afilter ctx :lowpass 0)
-        lp-cutoff (a/knob ctx unit 0 20000)
+        lp-cutoff (a/knob ctx unit 0 6000)
         lp-reso   (a/knob ctx unit 0 100)
         out       (a/gain ctx 1)]
 
