@@ -16,10 +16,16 @@
   (step-transformer [this transformer]))
 
 (defn random-pitch-val []
-  (+ 60 (* 20 (Math/random))))
+  (int (+ 60 (* 20 (Math/random)))))
+
+(defn pentatonic-pitch-val []
+  (let [steps [0 3 5 7 10 12]
+        base 69
+        step-num (int (* (Math/random) (count steps)))]
+    (+ base (nth steps step-num))))
 
 (defn randomize-step [step]
-  (assoc step :pitch (random-pitch-val)))
+  (assoc step :pitch (pentatonic-pitch-val)))
 
 (defn swap-step
   [step]

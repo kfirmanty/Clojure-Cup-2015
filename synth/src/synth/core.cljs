@@ -14,7 +14,7 @@
 
 (defonce steps (atom (into [] (for [i (range 16)]
                                 {:note-on true
-                                 :pitch (s/random-pitch-val)
+                                 :pitch (s/pentatonic-pitch-val)
                                  :num i}))))
 
 (defonce sequencer (s/sequencer s steps))
@@ -66,7 +66,8 @@
   [:div
     [:button {:on-click #(s/start clk)} "start seq"]
     [:button {:on-click #(s/stop clk)} "stop seq"]
-   [:button {:on-click #(s/step-transformer s s/randomize-step)} "randomize"]
+   [:button {:on-click #(s/step-transformer s s/randomize-step)} "randomize steps"]
+   [:button {:on-click #(s/step-transformer s identity)} "no transformation"]
    [:div
     (for [step @(:steps s)]
       (step-button step))]
