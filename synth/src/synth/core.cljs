@@ -9,20 +9,16 @@
 
 (println "Edits to this text should show up in your developer console.")
 
-;; define your app data so that it doesn't get over-written on reload
-
-(defonce app-state (atom {:text "Hello world!"}))
-
 (defonce ctx (audio/audio-context))
 (defonce s (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
 
 (defonce steps (atom (into [] (for [i (range 16)]
                                 {:note-on true
-                                 :pitch (s/random-pitch-val)
+                                 :pitch (s/pentatonic-pitch-val)
                                  :num i}))))
 
 (defonce sequencer (s/sequencer s steps))
-(defonce clock (s/clock sequencer (* 4 120)))
+(defonce clock (s/clock sequencer (* 4 100)))
 
 (defn step-button [step]
   ^{:key (:num step)} [:button {:on-click #(s/toggle-step sequencer step)
@@ -65,6 +61,7 @@
 
    [:div.clearfix]
    ])
+
 
 (defonce mouse-listeners (atom {:pos #{}}))
 
@@ -176,19 +173,35 @@
 
    ])
 
+(defn sequencer-block [s clk]
+  [:div
+    [:button {:on-click #(s/start clk)} "start seq"]
+    [:button {:on-click #(s/stop clk)} "stop seq"]
+   [:button {:on-click #(s/step-transformer s s/randomize-step)} "randomize steps"]
+   [:button {:on-click #(s/step-transformer s identity)} "no transformation"]
+   [:div
+    (for [step @(:steps s)]
+      (step-button step))]
+      [:div.knob
+       [:span "BPM"]
+       [:input {:type :range
+                :min 1
+                :max 200
+                :step 2
+                :defaultValue 100
+                :on-change #(s/set-bpm clk (* 4 (js/Number.parseFloat (-> % .-target .-value))))}]]])
+
+
 (defn hello-world []
-  [:div [:h1 (:text @app-state)]
+  [:div
    [:button {:on-click #(i/play s 69)} "on"]
    [:button {:on-click #(i/stop s 69)} "off"]
    [synthesizer s]
+
    [svg-box]
-   [:div
-    [:button {:on-click #(s/start clock)} "start seq"]
-    [:button {:on-click #(s/stop clock)} "stop seq"]
-    [:button {:on-click #(s/step-transformer sequencer s/randomize-step)} "randomize"]]
-   [:div
-    (for [step @steps]
-      (step-button step))]])
+
+   [sequencer-block sequencer clock]])
+
 
 
 (reagent/render-component [hello-world]

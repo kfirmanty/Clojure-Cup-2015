@@ -6,7 +6,8 @@
 (defprotocol Controlable
   (start [this])
   (stop [this])
-  (main-loop [this]))
+  (main-loop [this])
+  (set-bpm [this bpm]))
 
 (defprotocol Stepable
   (step [this step-num])
@@ -15,10 +16,16 @@
   (step-transformer [this transformer]))
 
 (defn random-pitch-val []
-  (+ 60 (* 20 (Math/random))))
+  (int (+ 60 (* 20 (Math/random)))))
+
+(defn pentatonic-pitch-val []
+  (let [steps [0 3 5 7 10 12]
+        base 69
+        step-num (int (* (Math/random) (count steps)))]
+    (+ base (nth steps step-num))))
 
 (defn randomize-step [step]
-  (assoc step :pitch (random-pitch-val)))
+  (assoc step :pitch (pentatonic-pitch-val)))
 
 (defn swap-step
   [step]
@@ -31,6 +38,9 @@
 
 (defn set-in-step [steps num what to]
   (swap! steps assoc-in [num what] to))
+
+(defn bpm-to-ms [bpm]
+  (/ (* 60 1000) bpm))
 
 (defrecord Sequencer [steps synth-chan transformer]
   Stepable
@@ -63,11 +73,15 @@
                      (if @running (do
                                     (step sequencer @count)
                                     (swap! count #(-> % inc (mod 16)))
-                                    (main-loop this)))) interval))
+                                    (main-loop this)))) @interval))
 
   (stop [this]
     (reset! running false)
-    (reset! count 0)))
+    (reset! count 0))
+
+  (set-bpm [this bpm]
+    (println bpm)
+    (reset! interval (bpm-to-ms bpm))))
 
 (defn sequencer
   ([synth-chan]
@@ -77,4 +91,4 @@
    (->Sequencer steps synth-chan (atom identity))))
 
 (defn clock [sequencer bpm]
-  (->Clock sequencer (/ (* 60 1000) bpm) (atom true) (atom 0)))
+  (->Clock sequencer (atom (bpm-to-ms bpm)) (atom true) (atom 0)))
