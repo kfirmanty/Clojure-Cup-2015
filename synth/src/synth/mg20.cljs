@@ -50,10 +50,28 @@
      :osc2-gain   osc2-gain
      :out         out}))
 
+(defn filters [ctx unit]
+  (let [lowpass (a/afilter ctx :lowpass 0)
+        lp-cutoff (a/knob ctx unit 0 20000)
+        lp-reso   (a/knob ctx unit 0 100)
+        out       (a/gain ctx 1)]
+
+    (a/setv lp-cutoff 1000)
+    (a/setv lp-reso   30)
+
+    (a/wire (:out lp-cutoff) (.-frequency lowpass))
+    (a/wire (:out lp-reso)   (.-Q lowpass))
+    (a/wire lowpass out)
+
+    {:lowpass lowpass
+     :out     out}))
+
 
 (defn mg20 [ctx]
   (let [unit (a/constant ctx 1)
         oscs (oscillators ctx unit)
+        filts (filters ctx unit)
         out (a/gain ctx 0)]
-    (a/wire (:out oscs) out)
+    (a/wire (:out oscs) (:lowpass filts))
+    (a/wire (:out filts) out)
     (MG20. ctx oscs out)))
