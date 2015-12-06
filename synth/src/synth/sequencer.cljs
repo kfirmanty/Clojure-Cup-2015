@@ -19,10 +19,10 @@
 (defrecord Sequencer [steps synth-chan]
   Stepable
   (step [this step-num]
-    (let [event (nth @steps step-num)]
-      (if (:note-on @event)
-        (i/play synth-chan (:pitch @event))
-        (i/stop synth-chan (:pitch @event)))
+    (let [event @(nth @steps step-num)]
+      (if (:note-on event)
+        (i/play synth-chan (:pitch event))
+        (i/stop synth-chan (:pitch event)))
                                         ;(put! synth-chan event)
       ))
   (set-step [this step]
