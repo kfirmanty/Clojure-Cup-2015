@@ -93,11 +93,11 @@
     (fn []
       [:g.sknob {:transform (str "translate(" x "," y ")")}
        (for [st steps]
-          [:line {:x1 0 :y1 -17
-                  :x2 0 :y2 -20
-                  :stroke-width 1
+          ^{:key st} [:line {:x1 0 :y1 -17
+                      :x2 0 :y2 -20
+                      :stroke-width 1
 
-                  :transform (str "rotate(" st ")")}])
+                      :transform (str "rotate(" st ")")}])
        [:g {:transform (str "rotate(" (:deg @s) ")")
             :on-mouse-down (fn [e]
                              (.preventDefault e)

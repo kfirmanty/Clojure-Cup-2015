@@ -74,6 +74,7 @@ svg .sknob circle {
 
 svg .sknob line {
     stroke:  #008188;
+    stroke-width: 2;
 }
 
 svg .bg {
