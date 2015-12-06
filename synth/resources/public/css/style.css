@@ -80,6 +80,10 @@ svg .group {
     margin: 10px;
 }
 
+.pknob {
+    width: 50px;
+}
+
 .knob span {
     display: block;
     font-weight: bold;
@@ -103,7 +107,7 @@ svg .group {
 }
 
 button {
-    height: 10px;
+    height: 20px;
     /*width: 20px;*/
     min-width: 20px;
     padding: 3px;

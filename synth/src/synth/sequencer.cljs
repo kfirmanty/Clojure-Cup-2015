@@ -12,6 +12,7 @@
 (defprotocol Stepable
   (step [this step-num])
   (toggle-step [this step])
+  (set-step-pitch [this step pitch])
   (randomize-pitch [this])
   (step-transformer [this transformer]))
 
@@ -57,6 +58,10 @@
   (toggle-step [this step]
     (swap! steps assoc-in [(:num step) :note-on]
            (-> step :note-on not)))
+
+  (set-step-pitch [this step pitch]
+    (println pitch)
+    (swap! steps assoc-in [(:num step) :pitch] pitch))
 
   (randomize-pitch [this]
     (swap! steps #(for [step %] (assoc step :pitch (random-pitch-val)))))

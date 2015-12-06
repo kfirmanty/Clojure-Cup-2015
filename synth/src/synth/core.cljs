@@ -21,7 +21,7 @@
 (defonce clock (s/clock sequencer (* 4 100)))
 
 (defn step-button [step]
-  ^{:key (:num step)} [:button {:on-click #(s/toggle-step sequencer step)
+  [:button {:on-click #(s/toggle-step sequencer step)
                                 :class (cond
                                            (:current step) "current-step"
                                            (:note-on step) "note-on"
@@ -173,15 +173,26 @@
 
    ])
 
+(defn randomize-button [s]
+  [:button {:on-click (fn [e]
+                        (let [fun (if (= identity @(:transformer s)) s/randomize-step identity)]
+                          (s/step-transformer s fun)))
+            :class (if (not (= identity @(:transformer s))) "pressed" "depressed")}])
+
 (defn sequencer-block [s clk]
   [:div
     [:button {:on-click #(s/start clk)} "start seq"]
     [:button {:on-click #(s/stop clk)} "stop seq"]
-   [:button {:on-click #(s/step-transformer s s/randomize-step)} "randomize steps"]
-   [:button {:on-click #(s/step-transformer s identity)} "no transformation"]
+   [randomize-button s]
    [:div
     (for [step @(:steps s)]
-      (step-button step))]
+      ^{:key (:num step)} [:div (step-button step)
+       [:input.pknob {:type :range
+                :min 57
+                :max 81
+                :step 1
+                :defaultValue (:pitch step)
+                      :on-change #(s/set-step-pitch s step (js/Number.parseFloat (-> % .-target .-value)))}]])]
       [:div.knob
        [:span "BPM"]
        [:input {:type :range
@@ -200,7 +211,8 @@
 
    [svg-box]
 
-   [sequencer-block sequencer clock]])
+   [sequencer-block sequencer clock]
+])
 
 
 
