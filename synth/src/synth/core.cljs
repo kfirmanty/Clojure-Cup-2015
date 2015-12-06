@@ -269,7 +269,7 @@
                                         (get @rotor :deg)
                                         (-> @se (get (:num d)) :pitch (range->unit min max) unit->deg)) ")")
             :on-mouse-down (fn [e]
-                             (println "kupa")
+                           ;  (println "kupa")
                              (.preventDefault e)
                              (.stopPropagation e)
                              (swap! rotor assoc :rotating true)
@@ -312,7 +312,7 @@
 (defn svg-seq-box [sqs sts]
   [:svg.seq-box {:width 1000 :height 120
                  :on-mouse-up (fn [e]
-                                (println "eee")
+                              ;  (println "eee")
                         (.preventDefault e)
                         (up-broadcast)
                         (reset! mouse-listeners #{})
@@ -359,9 +359,11 @@
    [control-btn "PANIC" 15 75 90 30 (fn [] (s/stop clock) (i/stop s 60))]
    [control-btn "START SEQ" 15 110 90 30 #(s/start clock)]
    [control-btn "STOP SEQ" 15 145 90 30 #(s/stop clock)]
-   [control-btn "RANDOMIZE" 15 180 90 30 #(for [s sequencers]
-                                            (doseq [i (range 0 16)]
-                                              (swap! (get s :steps) assoc-in [i :pitch] (s/pentatonic-pitch-val))))]
+   [control-btn "RANDOMIZE" 15 180 90 30 (fn [] (doseq [s sequencers]
+                                                 (doseq [i (range 0 16)]
+                                                   (swap! (:steps s) assoc-in [i :pitch] (s/pentatonic-pitch-val))))
+                                           true)]
+
    ])
 
 (defn hello-world []
