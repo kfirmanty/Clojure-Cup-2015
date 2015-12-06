@@ -37,8 +37,8 @@
     [:button {:on-click #(s/start clock)} "start seq"]
     [:button {:on-click #(s/stop clock)} "stop seq"]]
    [:div
-    (doall (for [step @steps]
-             (step-button step)))]])
+    (for [step @steps]
+        (step-button step))]])
 
 (reagent/render-component [hello-world]
                           (. js/document (getElementById "app")))
