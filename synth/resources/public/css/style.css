@@ -27,6 +27,23 @@ body {
     margin: 0 auto;
 }
 
+#header {
+    text-align: left;
+    margin: 0 auto;
+    width: 1000px;
+}
+
+#header svg {
+    margin-left: 10px;
+    margin-right: 20px;
+
+}
+
+#header h1 {
+    display: inline;
+    font-family: 'Roboto Condensed', Helvetica, sans-serif;
+}
+
 
 
 
@@ -180,6 +197,14 @@ svg .ctl-btn text {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select:none;
+}
+
+svg .ctl-btn.push rect {
+    fill:  white;
+}
+
+svg .ctl-btn.push text {
+    fill: #C14027;
 }
 
 .knob {

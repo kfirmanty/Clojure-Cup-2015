@@ -235,7 +235,7 @@
 
                              :transform (str "rotate(" st ")")}])
 
-       [:g {:transform (str "rotate(" (-> d :pitch (range->unit min max) unit->deg) ")")
+       [:g {:transform (str "rotate(" (-> @se (get (:num d)) :pitch (range->unit min max) unit->deg) ")")
             :on-mouse-down (comment fn [e]
                              (.preventDefault e)
                              (.stopPropagation e)
@@ -286,6 +286,8 @@
     (fn []
       [:g.ctl-btn {:class (when @active :push)
                    :transform (str "translate(" x "," y ")")
+                   :on-mouse-down #(reset! active true)
+                   :on-mouse-up #(reset! active false)
                    :on-click f}
 
        [:rect {:x 0 :y 0 :width w :height h :rx 5 :ry 5}]
@@ -299,7 +301,7 @@
    [:rect.group.red {:x 10 :y 10 :rx 5 :ry 5 :width 100 :height 210}]
    [:text.gtitle.red {:x 15 :y 25 } "CONTROL"]
    [control-btn "TEST SOUND" 15 40 90 30 #(i/play s 60)]
-   [control-btn "PANIC" 15 75 90 30 #(i/stop s 60)]
+   [control-btn "PANIC" 15 75 90 30 (fn [] (s/stop clock) (i/stop s 60))]
    [control-btn "START SEQ" 15 110 90 30 #(s/start clock)]
    [control-btn "STOP SEQ" 15 145 90 30 #(s/stop clock)]
    [control-btn "RANDOMIZE" 15 180 90 30 #(doseq [s sequencers]
