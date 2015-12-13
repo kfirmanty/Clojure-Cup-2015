@@ -22,7 +22,7 @@
         note
         (recur (inc step) (+ sum-weight note-weight))))))
 
-(defn random-weight [scale-key]
+(defn random-weighted [scale-key]
   (let [scale (scale-key scales)
         scale-sum (->> scale (map #(second %)) (reduce + 0))
         weight (-> (Math/random) (* scale-sum) int)

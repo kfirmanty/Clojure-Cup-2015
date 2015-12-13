@@ -16,7 +16,7 @@
 
 (defn get-steps [] (atom (into [] (for [i (range 16)]
                                     {:note-on true
-                                     :pitch (scales/random-weight :phrygian-dominant)
+                                     :pitch (scales/random-weighted :phrygian-dominant)
                                      :num i}))))
 
 (defonce sequencers [(s/sequencer s (get-steps)) (s/sequencer s2 (get-steps))])
@@ -354,7 +354,7 @@
 
 (defn randomize-pitch-in-seq-steps [sequencer scale-key]
   (let [steps-pitch (for [i (range 0 16)]
-                      (scales/random-weight scale-key))
+                      (scales/random-weighted scale-key))
         steps-pitch-even (scales/even-out steps-pitch scale-key)]
      (doseq [i (range 0 16)]
        (swap! (:steps sequencer) assoc-in [i :pitch] (nth steps-pitch-even i)))))
