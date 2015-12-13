@@ -3,7 +3,8 @@
             [synth.audio :as audio]
             [synth.instrument :as i]
             [synth.mg20 :as syn]
-            [synth.sequencer :as s]))
+            [synth.sequencer :as s]
+            [synth.scales :as scales]))
 
 (enable-console-print!)
 
@@ -15,7 +16,7 @@
 
 (defn get-steps [] (atom (into [] (for [i (range 16)]
                                     {:note-on true
-                                     :pitch (s/pentatonic-pitch-val)
+                                     :pitch (scales/random-weight :phrygian-dominant)
                                      :num i}))))
 
 (defonce sequencers [(s/sequencer s (get-steps)) (s/sequencer s2 (get-steps))])
@@ -351,6 +352,13 @@
       ))
   )
 
+(defn randomize-pitch-in-seq-steps [sequencer scale-key]
+  (let [steps-pitch (for [i (range 0 16)]
+                      (scales/random-weight scale-key))
+        steps-pitch-even (scales/even-out steps-pitch scale-key)]
+     (doseq [i (range 0 16)]
+       (swap! (:steps sequencer) assoc-in [i :pitch] (nth steps-pitch-even i)))))
+
 (defn svg-control-box []
   [:svg {:width 120 :height 230}
    [:rect.group.red {:x 10 :y 10 :rx 5 :ry 5 :width 100 :height 210}]
@@ -360,8 +368,7 @@
    [control-btn "START SEQ" 15 110 90 30 #(s/start clock)]
    [control-btn "STOP SEQ" 15 145 90 30 #(s/stop clock)]
    [control-btn "RANDOMIZE" 15 180 90 30 (fn [] (doseq [s sequencers]
-                                                 (doseq [i (range 0 16)]
-                                                   (swap! (:steps s) assoc-in [i :pitch] (s/pentatonic-pitch-val))))
+                                                 (randomize-pitch-in-seq-steps s :pentatonic-minor))
                                            true)]
 
    ])

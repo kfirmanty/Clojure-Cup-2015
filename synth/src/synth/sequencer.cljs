@@ -1,7 +1,8 @@
 (ns synth.sequencer
   (:require [cljs.core.async :refer [put!]]
             [synth.instrument :as i]
-            [reagent.core :as reagent :refer [atom]]))
+            [reagent.core :as reagent :refer [atom]]
+            [synth.scales :as s]))
 
 (defprotocol Controlable
   (start [this])
@@ -16,17 +17,9 @@
   (randomize-pitch [this])
   (step-transformer [this transformer]))
 
-(defn random-pitch-val []
-  (int (+ 60 (* 20 (Math/random)))))
-
-(defn pentatonic-pitch-val []
-  (let [steps [0 3 5 7 10 12]
-        base 69
-        step-num (int (* (Math/random) (count steps)))]
-    (+ base (nth steps step-num))))
 
 (defn randomize-step [step]
-  (assoc step :pitch (pentatonic-pitch-val)))
+  (assoc step :pitch (s/random-pitch-val)))
 
 (defn swap-step
   [step]
@@ -51,9 +44,7 @@
       (set-in-step steps step-num :current true)
       (if (:note-on event)
         (i/play synth-chan (:pitch event))
-        (i/stop synth-chan (:pitch event)))
-                                        ;(put! synth-chan event)
-      ))
+        (i/stop synth-chan (:pitch event)))))
 
   (toggle-step [this step]
     (swap! steps assoc-in [(:num step) :note-on]
@@ -63,7 +54,7 @@
     (swap! steps assoc-in [(:num step) :pitch] pitch))
 
   (randomize-pitch [this]
-    (swap! steps #(for [step %] (assoc step :pitch (random-pitch-val)))))
+    (swap! steps #(for [step %] (assoc step :pitch (s/random-pitch-val)))))
   (step-transformer [this new-transformer] (reset! transformer new-transformer)))
 
 (defrecord Clock [sequencers interval running count]
