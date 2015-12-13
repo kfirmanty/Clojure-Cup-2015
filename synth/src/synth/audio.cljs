@@ -101,6 +101,7 @@
         (.setValueAtTime 0 t)
         (.setValueAtTime (.-value (.-gain out)) t)
         (.linearRampToValueAtTime 1 (+ t (current a)))
+        ;(.setValueAtTime (.-value (.-gain out)) (+ t (current a)))
         (.linearRampToValueAtTime (current s) (+ t (current a) (current d)))))
     )
 
@@ -117,7 +118,8 @@
 
 (defn adsr [ctx unit a d s r]
   (ADSR. ctx unit a d s r (wire unit
-                                (gain ctx 0))))
+                                (gain ctx 0))
+         ))
 
 (defn clip [val min max]
   (cond (< val min) min
