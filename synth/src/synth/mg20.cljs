@@ -76,9 +76,9 @@
 
 (defn filters [ctx unit]
   (let [lowpass (a/afilter ctx :lowpass 0)
-        lp-cutoff (a/knob ctx unit 0 6000)
-        env-amt   (a/tknob ctx unit 0 3000)
-        lp-reso   (a/knob ctx unit 0 100)
+        lp-cutoff (a/knob ctx unit 0 20000)
+        env-amt   (a/tknob ctx unit 0 10000)
+        lp-reso   (a/knob ctx unit 0 40)
         out       (a/gain ctx 1)]
 
     (a/setv lp-cutoff 1000)
