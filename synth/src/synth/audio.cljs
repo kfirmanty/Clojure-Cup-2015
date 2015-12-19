@@ -171,3 +171,20 @@
   ([midi] (midi->hz midi 0))
   ([midi oct]
    (* 440 (js/Math.pow 2.0 (/ (- (+ (* 12 oct) midi) 69) 12)))))
+
+(defrecord Monitor [input tsize fsize fdata tdata])
+
+(defn monitor [ctx]
+  (let [sz 512
+        m (.createAnalyser ctx)
+        fs  (.-frequencyBinCount m)
+        f (js/Uint8Array. fs)
+        t (js/Uint8Array. sz)]
+    (set! (.-fftSize m) sz)
+    (Monitor. m sz fs f t)))
+
+(defn monitor-refresh [m]
+ ; (println (:input m))
+  (.getByteTimeDomainData (:input m) (:tdata m))
+  ;(.getByteFrequencyData (:input m) (:fdata m))
+  )

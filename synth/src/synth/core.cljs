@@ -13,6 +13,10 @@
 (defonce ctx (audio/audio-context))
 (defonce s (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
 (defonce s2 (audio/connect  (syn/mg20 ctx) (.-destination ctx)))
+(defonce mon (let [m (audio/monitor ctx)]
+               (audio/connect s (:input m))
+               m))
+
 
 (defn get-steps [] (atom (into [] (for [i (range 16)]
                                     {:note-on true
@@ -375,11 +379,43 @@
 
    ])
 
+(defn update-monitor []
+  (.requestAnimationFrame js/window update-monitor)
+  (when-let [cv (.getElementById js/document "mont")]
+    (audio/monitor-refresh mon)
+    (let [tc (.getContext cv "2d")]
+      (.clearRect tc 0 0 (:tsize mon) 256)
+      (.beginPath tc)
+      (.moveTo tc 0 128)
+      (.lineTo tc 512 128)
+      (.moveTo tc 0 0)
+      (.lineTo tc 512 0)
+      (.moveTo tc 0 256)
+      (.lineTo tc 512 256)
+      (.stroke tc)
+       (.beginPath tc)
+      (.moveTo tc 0 (aget (:tdata mon) 0))
+      (dotimes [x (:tsize mon)]
+
+        ;(.moveTo tc x 128)
+        (.lineTo tc x (aget (:tdata mon) x))
+        (.stroke tc)
+        )))
+  )
+
+(defn monitor-ui []
+  (update-monitor)
+  (fn []
+    [:div
+     [:canvas#mont {:width (:tsize mon) :height 256}]
+     [:canvas#monf {:width (:fsize mon) :height 100}]]))
+
 (defn hello-world []
   [:div#wrap
    [svg-control-box]
    [svg-synth-box s]
    [svg-synth-box s2]
+   [monitor-ui]
    (for [sequencer sequencers]
      ^{:key (str "se-view-" (rand))} [svg-seq-box sequencer (:steps sequencer)])
    ;[sequencer-block sequencer clock]
