@@ -44,9 +44,10 @@
         osc1-vf    (a/switch (vf-switcher osc1) 0 3)    ; :sawtooth :triangle :square
         osc2-vf    (a/switch (vf-switcher osc2) 0 3)
         osc2-detune (a/knob ctx unit -10 10)
-        osc1-gain  (a/knob ctx unit 0 1)
-        osc2-gain  (a/knob ctx unit 0 1)
-        out        (a/mix- ctx (:out osc1-gain) (:out osc2-gain))]
+        osc1-gain  (a/tknob ctx unit 0 1)
+        osc2-gain  (a/tknob ctx unit 0 1)
+        out        (a/mix- ctx (:out osc1-gain) (:out osc2-gain))
+        ]
 
     (a/setv main-tune 0)
     (a/setv osc2-detune 0.1)
@@ -76,7 +77,7 @@
 
 (defn filters [ctx unit]
   (let [lowpass (a/afilter ctx :lowpass 0)
-        lp-cutoff (a/knob ctx unit 0 20000)
+        lp-cutoff (a/knob ctx unit 0 16000)
         env-amt   (a/tknob ctx unit 0 10000)
         lp-reso   (a/knob ctx unit 0 40)
         out       (a/gain ctx 1)]
@@ -113,7 +114,7 @@
         oscs (oscillators ctx unit)
         filts (filters ctx unit)
         env1  (envelope ctx unit)
-        master-vol (a/knob ctx unit 0 1)
+        master-vol (a/tknob ctx unit 0 1)
 
         out (a/gain ctx 0)]
     (a/setv master-vol 0.1)
@@ -121,5 +122,5 @@
     (a/wire (:out filts) out)
     (a/connect (:out env1) (.-gain out))
     (a/connect (:out env1) (-> filts :env-amt :out))
-   ; (a/wire out (:out master-vol))
-    (MG20. ctx master-vol oscs filts env1 (a/*- ctx (:out master-vol) out))))
+    (a/wire out (:out master-vol))
+    (MG20. ctx master-vol oscs filts env1 (:out master-vol) )))
