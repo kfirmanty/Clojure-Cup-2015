@@ -8,10 +8,14 @@
                  [org.clojure/clojurescript "1.7.170"]
                  [org.clojure/core.async "0.2.374"]
                  [cljs-ajax "0.5.2"]
-                 [reagent "0.5.0"]]
+                 [reagent "0.5.0"]
+                 [factual/clj-leveldb "0.1.1"]
+                 [compojure "1.4.0"]
+                 [ring/ring-defaults "0.1.5"]]
 
   :plugins [[lein-cljsbuild "1.1.1"]
-            [lein-figwheel "0.5.0-1"]]
+            [lein-figwheel "0.5.0-1"]
+            [lein-ring "0.9.7"]]
 
   :source-paths ["src"]
 
@@ -37,6 +41,8 @@
                            :main synth.core
                            :optimizations :advanced
                            :pretty-print false}}]}
+
+  :ring {:handler synth.server/app}
 
   :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default
