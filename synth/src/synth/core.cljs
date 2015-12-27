@@ -4,7 +4,8 @@
             [synth.instrument :as i]
             [synth.mg20 :as syn]
             [synth.sequencer :as s]
-            [synth.scales :as scales]))
+            [synth.scales :as scales]
+            [ajax.core :as ajax]))
 
 (enable-console-print!)
 
@@ -370,7 +371,12 @@
    [:rect.group.red {:x 10 :y 10 :rx 5 :ry 5 :width 100 :height 210}]
    [:text.gtitle.red {:x 15 :y 25 } "CONTROL"]
    [control-btn "TEST SOUND" 15 40 90 30 #(i/play s 60)]
-   [control-btn "PANIC" 15 75 90 30 (fn [] (s/stop clock) (i/stop s 60))]
+   [control-btn "SAVE" 15 75 90 30 ;(fn [] (s/stop clock) (i/stop s 60))
+    (fn []
+      (let [steps (map #(-> % :steps deref) sequencers)]
+        (ajax/POST "/db"
+                   {:params  {:synth steps}
+                    :format :json})))]
    [control-btn "START SEQ" 15 110 90 30 #(s/start clock)]
    [control-btn "STOP SEQ" 15 145 90 30 #(s/stop clock)]
    [control-btn "RANDOMIZE" 15 180 90 30 (fn [] (doseq [s sequencers]

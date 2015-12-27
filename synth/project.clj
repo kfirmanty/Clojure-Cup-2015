@@ -11,7 +11,8 @@
                  [reagent "0.5.0"]
                  [factual/clj-leveldb "0.1.1"]
                  [compojure "1.4.0"]
-                 [ring/ring-defaults "0.1.5"]]
+                 [ring/ring-defaults "0.1.5"]
+                 [ring/ring-json "0.4.0"]]
 
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-figwheel "0.5.0-1"]
@@ -57,7 +58,7 @@
              ;; if you want to embed a ring handler into the figwheel http-kit
              ;; server, this is for simple ring servers, if this
              ;; doesn't work for you just run your own server :)
-             ;; :ring-handler hello_world.server/handler
+             :ring-handler synth.server/app
 
              ;; To be able to open files in your editor from the heads up display
              ;; you will need to put a script on your path.
