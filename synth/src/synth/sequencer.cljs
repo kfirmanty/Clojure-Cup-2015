@@ -38,8 +38,9 @@
 
 (defrecord Sequencer [steps synth-chan transformer]
   Stepable
-  (step [this step-num]
-    (let [event (-> @steps (nth step-num) (@transformer))]
+  (step [this timer]
+    (let [step-num (mod timer (count @steps))
+          event (-> @steps (nth step-num) (@transformer))]
       (clear-current steps)
       (set-in-step steps step-num :current true)
       (if (:note-on event)
@@ -68,7 +69,7 @@
                      (if @running (do
                                     (doseq [sequencer sequencers]
                                       (step sequencer @count))
-                                    (swap! count #(-> % inc (mod 16)))
+                                    (swap! count inc)
                                     (main-loop this)))) @interval))
 
   (stop [this]

@@ -19,12 +19,12 @@
                m))
 
 
-(defn get-steps [] (atom (into [] (for [i (range 16)]
+(defn get-steps [len] (atom (into [] (for [i (range len)]
                                     {:note-on true
                                      :pitch (scales/random-weighted :phrygian-dominant)
                                      :num i}))))
 
-(defonce sequencers [(s/sequencer s (get-steps)) (s/sequencer s2 (get-steps))])
+(defonce sequencers [(s/sequencer s (get-steps 16)) (s/sequencer s2 (get-steps 16))])
 (defonce clock (s/clock sequencers (* 4 100)))
 
 (defn step-button [step sequencer]
@@ -360,17 +360,29 @@
   )
 
 (defn randomize-pitch-in-seq-steps [sequencer scale-key]
-  (let [steps-pitch (for [i (range 0 16)]
+  (let [steps (:steps sequencer)
+        steps-pitch (for [i (range (count @steps))]
                       (scales/random-weighted scale-key))
         steps-pitch-even (scales/even-out steps-pitch scale-key)]
-     (doseq [i (range 0 16)]
-       (swap! (:steps sequencer) assoc-in [i :pitch] (nth steps-pitch-even i)))))
+     (doseq [i (range (count @steps))]
+       (swap! steps assoc-in [i :pitch] (nth steps-pitch-even i)))))
+
+(defn shorten-seq [sequencer]
+  (swap! (:steps sequencer) #(take (-> % count dec (max 1)) %)))
+
+(defn expand-seq [sequencer scale-key]
+  (let [steps (:steps sequencer)
+        seq-len (count @steps)
+        copy-step (nth @steps (dec seq-len))
+        new-step (assoc copy-step :num (-> copy-step :num inc))]
+    (swap! steps #(conj % new-step))))
 
 (defn svg-control-box []
   [:svg {:width 120 :height 230}
    [:rect.group.red {:x 10 :y 10 :rx 5 :ry 5 :width 100 :height 210}]
    [:text.gtitle.red {:x 15 :y 25 } "CONTROL"]
-   [control-btn "TEST SOUND" 15 40 90 30 #(i/play s 60)]
+   [control-btn "-" 22 40 30 30 #(shorten-seq (first sequencers))]
+   [control-btn "+" 67 40 30 30 #(expand-seq (first sequencers) :pentatonic-minor)]
    [control-btn "SAVE" 15 75 90 30 ;(fn [] (s/stop clock) (i/stop s 60))
     (fn []
       (let [steps (map #(-> % :steps deref) sequencers)]
