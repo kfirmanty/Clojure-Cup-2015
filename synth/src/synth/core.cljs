@@ -373,8 +373,8 @@
 (defn expand-seq [sequencer scale-key]
   (let [steps (:steps sequencer)
         seq-len (count @steps)
-        copy-step (nth @steps (dec seq-len))
-        new-step (assoc copy-step :num (-> copy-step :num inc))]
+        base-step (nth @steps (dec seq-len))
+        new-step (assoc base-step :num (-> base-step :num inc))]
     (swap! steps #(conj % new-step))))
 
 (defn svg-control-box []
