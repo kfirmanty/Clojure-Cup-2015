@@ -18,6 +18,8 @@
             [lein-figwheel "0.5.0-1"]
             [lein-ring "0.9.7"]]
 
+  :hooks [leiningen.cljsbuild]
+
   :source-paths ["src"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
