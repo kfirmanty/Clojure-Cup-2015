@@ -98,6 +98,19 @@ svg .sknob text {
     user-select:none;
 }
 
+svg text.label {
+    font-size: 11px;
+    fill: #333;
+    pointer-events: none;
+    font-family: 'Roboto Condensed', Helvetica, sans-serif;
+        -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select:none;
+}
+
 svg .sknob circle {
     fill: #008188;
     cursor: pointer;
@@ -183,7 +196,17 @@ svg.seq-box {
 
 
 svg circle.led {
-    fill: red;
+    fill: transparent;
+    transition: fill 0.1s;
+}
+
+svg circle.led.led-on {
+    fill: #C14027;
+}
+
+svg circle.led-rind {
+    stroke: #008188;
+    stroke-width: 2;
 }
 
 svg .ctl-btn rect {
