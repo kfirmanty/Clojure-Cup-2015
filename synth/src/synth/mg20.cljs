@@ -119,7 +119,7 @@
         oscs (oscillators ctx unit)
         filts (filters ctx unit)
         env1  (envelope ctx unit)
-        master-vol (a/tknob ctx unit 0 1)
+        master-vol (a/tknob ctx unit 0 0.5)
 
         out (a/gain ctx 0)]
     (a/setv master-vol 0.1)

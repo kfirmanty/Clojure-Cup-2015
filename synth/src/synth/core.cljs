@@ -403,9 +403,13 @@
         (ajax/POST "/db"
                    {:params  {:synth steps}
                     :format :json})))]
-   [control-btn "START SEQ" 15 145 90 30 #(s/start clock)]
-   [control-btn "STOP SEQ" 15 180 90 30 #(s/stop clock)]
-   [control-btn "RANDOMIZE" 15 40 90 30 (fn [] (doseq [s sequencers]
+   ;;[control-btn "START SEQ" 15 145 90 30 #(s/start clock)]
+   ;;[control-btn "STOP SEQ" 15 180 90 30 #(s/stop clock)]
+   [control-btn (if @(:running clock) "PAUSE" "PLAY") 15 163 90 50
+    (fn []
+      (if @(:running clock) (s/stop clock) (s/start clock))
+      )]
+   [control-btn "RAND. NOTES" 15 40 90 30 (fn [] (doseq [s sequencers]
                                                  (randomize-pitch-in-seq-steps s :pentatonic-minor))
                                            true)]
 
