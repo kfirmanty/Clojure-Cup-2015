@@ -24,7 +24,9 @@
                                      :pitch (scales/random-weighted :phrygian-dominant)
                                      :num i}))))
 
-(defonce sequencers [(s/sequencer s (get-steps 16)) (s/sequencer s2 (get-steps 16))])
+(defonce sequencers [(s/sequencer s (get-steps 16))
+                     (s/sequencer s2 (get-steps 16))])
+
 (defonce clock (s/clock sequencers (* 4 100)))
 
 (defn step-button [step sequencer]
@@ -36,6 +38,7 @@
 
 
 (defonce mouse-listeners (atom #{}))
+
 (defonce up-listeners (atom #{}))
 
 (defn mouse-broadcast [x y]
@@ -132,10 +135,11 @@
                                     )
                              )}
 
-        [:circle {:r 15 :cx 0 :cy 0 }]
+        [:circle {:r 15 :cx 0 :cy 0}]
         [:rect {:x -1 :y -12 :width 3 :height 5 :style {:fill "#fff"}}]]
         [:text {:x 0 :y 30 :text-anchor :middle} title]
         ])))
+
 
 (defn svg-synth-box [s name]
   [:svg {:width 440 :height 230
@@ -166,6 +170,12 @@
    [:text.gtitle {:x 15 :y 25 } "MASTER"]
    [svg-knob "TUNE" 40 50 (-> s :osc :main-tune) [-100 0 100]]
    [svg-knob "VOLUME" 40 110 (-> s :master-vol) nil {:taper taper-log}]
+
+   ;; this does not update automatically! FIX
+   (when @(:playing s)
+     (println "play")
+     [:circle.led {:r 15 :cx 40 :cy 160}]
+     )
 
 
    [:rect.group {:x 80 :y 10 :rx 5 :ry 5 :width 60 :height 210}]
