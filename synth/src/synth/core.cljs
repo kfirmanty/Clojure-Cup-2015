@@ -186,10 +186,11 @@
    [svg-knob "VOLUME" 40 110 (-> s :master-vol) nil {:taper taper-log}]
 
    ;; this does not update automatically! FIX
-   (when @(:playing s)
-     (println "play")
-     [:circle.led {:r 15 :cx 40 :cy 160}]
-     )
+
+   [:circle.led-rind {:r 8 :cx 40 :cy 170}]
+   [:circle.led {:class (when @(:playing s) "led-on") :r 5 :cx 40 :cy 170}]
+   [:text.label {:x 40 :y 200 :text-anchor :middle} "GATE"]
+
 
 
    [:rect.group {:x 80 :y 10 :rx 5 :ry 5 :width 60 :height 210}]
