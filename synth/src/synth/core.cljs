@@ -18,13 +18,29 @@
                (audio/connect s (:input m))
                m))
 
+(defonce sequencers [(s/sequencer s (atom [])) (s/sequencer s2 (atom []))])
 
-(defn get-steps [len] (atom (into [] (for [i (range len)]
-                                    {:note-on true
-                                     :pitch (scales/random-weighted :phrygian-dominant)
-                                     :num i}))))
+(defn update-steps [sequencers raw-msg]
+  (let [msg (cljs.reader/read-string raw-msg)]
+    (loop [s sequencers steps msg]
+      (when (and (some? (first s)) (some? (first steps)))
+        (reset! (:steps (first s)) (first steps))
+        (recur (rest s) (rest steps))))))
 
-(defonce sequencers [(s/sequencer s (get-steps 16)) (s/sequencer s2 (get-steps 16))])
+(defn gen-steps [len]
+  (into [] (for [i (range len)]
+               {:note-on true
+                :pitch (scales/random-weighted :phrygian-dominant)
+                :num i})))
+
+(defn init-sequencers [sequencers]
+  (let [hash (clojure.string/replace js/window.location.hash #"#" "")
+        db-res (when hash (ajax/GET (str "/db/" hash)
+                                    {:handler #(update-steps sequencers %)
+                                     :error-handler (fn [msg]
+                                                      (doseq [s sequencers]
+                                                        (reset! (:steps s) (gen-steps 16))))}))]))
+
 (defonce clock (s/clock sequencers (* 4 100)))
 
 (defn step-button [step sequencer]
@@ -380,6 +396,9 @@
         new-step (assoc base-step :num (-> base-step :num inc))]
     (swap! steps #(conj % new-step))))
 
+(defn save-db-success [msg]
+  (println msg))
+
 (defn svg-control-box []
   [:svg {:width 120 :height 230}
    [:rect.group.red {:x 10 :y 10 :rx 5 :ry 5 :width 100 :height 210}]
@@ -391,7 +410,8 @@
       (let [steps (map #(-> % :steps deref) sequencers)]
         (ajax/POST "/db"
                    {:params  {:synth steps}
-                    :format :json})))]
+                    :format :json
+                    :handler save-db-success})))]
    [control-btn "START SEQ" 15 145 90 30 #(s/start clock)]
    [control-btn "STOP SEQ" 15 180 90 30 #(s/stop clock)]
    [control-btn "RANDOMIZE" 15 40 90 30 (fn [] (doseq [s sequencers]
@@ -432,6 +452,7 @@
      [:canvas#monf {:width (:fsize mon) :height 100}]]))
 
 (defn hello-world []
+  (init-sequencers sequencers)
   [:div#wrap
    [svg-control-box]
    [svg-synth-box s "A"]
