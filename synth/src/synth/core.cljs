@@ -433,7 +433,7 @@
    [svg-control-box]
    [svg-synth-box s]
    [svg-synth-box s2]
-   [monitor-ui]
+   ;;[monitor-ui]
    (for [sequencer sequencers]
      ^{:key (str "se-view-" (rand))} [svg-seq-box sequencer (:steps sequencer)])
    ;[sequencer-block sequencer clock]
