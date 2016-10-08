@@ -214,6 +214,17 @@ svg text.name {
     font-family: 'Roboto Condensed', Helvetica, sans-serif
 }
 
+svg text.seq-name {
+    font-size: 20px;
+    fill: #008188;
+    font-family: 'Roboto Condensed', Helvetica, sans-serif
+}
+
+.seq-header {
+    stroke-dasharray: 970,0,10,990,30;
+}
+
+
 .knob {
     width: 120px;
     float: left;

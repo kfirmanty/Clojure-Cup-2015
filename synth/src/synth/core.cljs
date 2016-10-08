@@ -308,18 +308,18 @@
         cur (:current s)
         note (:note-on s)]
     [:g
-     [:rect.group.step-g {:x (+ 10 (* 61 i)) :y 10 :rx 5 :ry 5 :width 55 :height 100
+     [:rect.group.step-g {:x (+ 10 (* 61 i)) :y 40 :rx 5 :ry 5 :width 55 :height 100
                           :class (str (when note " note")
                                       (when (= (rem i 4) 0) " bar")
                                       (when cur " on"))}]
-     [seq-button (+ 23 (* 61 i)) 23 sq s]
-     [seq-knob (+ 38 (* 61 i)) 80 se s]
+     [seq-button (+ 23 (* 61 i)) 53 sq s]
+     [seq-knob (+ 38 (* 61 i)) 110 se s]
 
      ])
   )
 
-(defn svg-seq-box [sqs sts]
-  [:svg.seq-box {:width 1000 :height 120
+(defn svg-seq-box [sqs sts nam]
+  [:svg.seq-box {:width 1000 :height 150
                  :on-mouse-up (fn [e]
                               ;  (println "eee")
                         (.preventDefault e)
@@ -341,6 +341,8 @@
 
 
                             ))}
+   [:rect.group.seq-header {:x 10 :y 10 :width 970 :height 30 :rx 5 :ry 5}]
+   [:text.seq-name {:x 16 :y 32} (str "SEQ " nam)]
    (for [s @sts]
      ^{:key (str (:num s) "-step")} [seq-step sqs sts s])]
   )
@@ -435,8 +437,8 @@
    [svg-synth-box s "A"]
    [svg-synth-box s2 "B"]
    ;;[monitor-ui]
-   (for [sequencer sequencers]
-     ^{:key (str "se-view-" (rand))} [svg-seq-box sequencer (:steps sequencer)])
+   (for [[sequencer nam] (map vector sequencers ["A" "B"])]
+     ^{:key (str "se-view-" (rand))} [svg-seq-box sequencer (:steps sequencer) nam])
    ;[sequencer-block sequencer clock]
    ])
 
