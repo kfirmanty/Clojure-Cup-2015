@@ -182,6 +182,10 @@ svg.seq-box {
 }
 
 
+svg circle.led {
+    fill: red;
+}
+
 svg .ctl-btn rect {
     fill:  #C14027;
     cursor: pointer;

@@ -2,7 +2,7 @@
   (:require [synth.audio :as a]
             [synth.instrument :as i]))
 
-(defrecord MG20 [ctx master-vol osc filt envs out]
+(defrecord MG20 [ctx master-vol osc filt envs out playing]
   a/Node
   (connect [self somewhere] (.connect out somewhere) self)
 
@@ -13,12 +13,16 @@
     (a/setv (:osc1-pitch osc) (a/midi->hz note (a/current (:osc1-oct osc))))
     (a/setv (:osc2-pitch osc) (a/midi->hz note (a/current (:osc2-oct osc))))
                                         ;(aset out "gain" "value" 0.5)
+     (println "start" note)
+    (reset! playing true)
     (a/trigger (:out envs))
     )
 
   (stop [_ note]
-   ; (println "stop" note)
-    ;(aset out "gain" "value" 0)
+    (println "stop" note)
+                                        ;(aset out "gain" "value" 0)
+    (reset! playing false)
+
     (a/detrigger (:out envs))
     )
 
@@ -123,4 +127,4 @@
     (a/connect (:out env1) (.-gain out))
     (a/connect (:out env1) (-> filts :env-amt :out))
     (a/wire out (:out master-vol))
-    (MG20. ctx master-vol oscs filts env1 (:out master-vol) )))
+    (MG20. ctx master-vol oscs filts env1 (:out master-vol) (atom false))))
