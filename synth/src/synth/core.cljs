@@ -137,7 +137,7 @@
         [:text {:x 0 :y 30 :text-anchor :middle} title]
         ])))
 
-(defn svg-synth-box [s]
+(defn svg-synth-box [s name]
   [:svg {:width 440 :height 230
 
          :on-mouse-up (fn [e]
@@ -191,6 +191,7 @@
    [svg-knob "DECAY" 390 50 (-> s :envs :d)]
    [svg-knob "SUSTAIN" 320 110 (-> s :envs :s)]
    [svg-knob "RELEASE" 390 110 (-> s :envs :r)]
+   [:text.name {:x 300 :y 195} (str "SYNTH " name)]
    ])
 
 
@@ -381,17 +382,17 @@
   [:svg {:width 120 :height 230}
    [:rect.group.red {:x 10 :y 10 :rx 5 :ry 5 :width 100 :height 210}]
    [:text.gtitle.red {:x 15 :y 25 } "CONTROL"]
-   [control-btn "-" 22 40 30 30 #(shorten-seq (first sequencers))]
-   [control-btn "+" 67 40 30 30 #(expand-seq (first sequencers) :pentatonic-minor)]
-   [control-btn "SAVE" 15 75 90 30 ;(fn [] (s/stop clock) (i/stop s 60))
+   ;;[control-btn "-" 22 40 30 30 #(shorten-seq (first sequencers))]
+   ;;[control-btn "+" 67 40 30 30 #(expand-seq (first sequencers) :pentatonic-minor)]
+   [control-btn "SAVE" 15 75 90 30
     (fn []
       (let [steps (map #(-> % :steps deref) sequencers)]
         (ajax/POST "/db"
                    {:params  {:synth steps}
                     :format :json})))]
-   [control-btn "START SEQ" 15 110 90 30 #(s/start clock)]
-   [control-btn "STOP SEQ" 15 145 90 30 #(s/stop clock)]
-   [control-btn "RANDOMIZE" 15 180 90 30 (fn [] (doseq [s sequencers]
+   [control-btn "START SEQ" 15 145 90 30 #(s/start clock)]
+   [control-btn "STOP SEQ" 15 180 90 30 #(s/stop clock)]
+   [control-btn "RANDOMIZE" 15 40 90 30 (fn [] (doseq [s sequencers]
                                                  (randomize-pitch-in-seq-steps s :pentatonic-minor))
                                            true)]
 
@@ -431,8 +432,8 @@
 (defn hello-world []
   [:div#wrap
    [svg-control-box]
-   [svg-synth-box s]
-   [svg-synth-box s2]
+   [svg-synth-box s "A"]
+   [svg-synth-box s2 "B"]
    ;;[monitor-ui]
    (for [sequencer sequencers]
      ^{:key (str "se-view-" (rand))} [svg-seq-box sequencer (:steps sequencer)])

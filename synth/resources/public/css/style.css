@@ -208,6 +208,12 @@ svg .ctl-btn.push text {
     fill: #C14027;
 }
 
+svg text.name {
+    font-size: 30px;
+    fill: #008188;
+    font-family: 'Roboto Condensed', Helvetica, sans-serif
+}
+
 .knob {
     width: 120px;
     float: left;
