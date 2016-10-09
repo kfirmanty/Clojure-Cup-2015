@@ -33,7 +33,7 @@
 (defn set-in-step [steps num what to]
   (swap! steps assoc-in [num what] to))
 
-(defn bpm-to-ms [bpm]
+(defn bpm->ms [bpm]
   (/ (* 60 1000) bpm))
 
 (defrecord Sequencer [steps synth-chan transformer]
@@ -80,7 +80,7 @@
                    (* 2 interval)))
 
   (set-bpm [this bpm]
-    (reset! interval (bpm-to-ms bpm))))
+    (reset! interval (bpm->ms bpm))))
 
 (defn sequencer
   ([synth-chan]
@@ -90,4 +90,4 @@
    (->Sequencer steps synth-chan (atom identity))))
 
 (defn clock [sequencers bpm]
-  (->Clock sequencers (atom (bpm-to-ms bpm)) (atom true) (atom 0)))
+  (->Clock sequencers (atom (bpm->ms bpm)) (atom true) (atom 0)))
