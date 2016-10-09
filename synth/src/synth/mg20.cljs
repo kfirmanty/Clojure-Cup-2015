@@ -1,7 +1,26 @@
 (ns synth.mg20
   (:require [synth.audio :as a]
             [synth.instrument :as i]
-            [reagent.core :as reagent :refer [atom]]))
+            [reagent.core :as reagent :refer [atom]]
+            [clojure.walk :as walk]))
+
+(defn knob? [k]
+  (or
+   (instance? a/Knob k)
+   (instance? a/Switch k)))
+
+(defn serialize-knob [k]
+  (a/current k))
+
+(defn serialize-group [g]
+  (into {} (filter some?
+                                    (map (fn [[k v]]
+                                           (if (knob? v)
+                                             [k (serialize-knob v)])
+                                           ) g)))
+  )
+
+(defn deserialize-group! [g])
 
 (defrecord MG20 [ctx master-vol osc filt envs out playing]
   a/Node
@@ -25,6 +44,26 @@
     (reset! playing false)
 
     (a/detrigger (:out envs))
+    )
+
+  (serialize [self]
+    {:osc (serialize-group osc)
+     :filt (serialize-group filt)
+     :envs (serialize-group envs)
+     :master-vol (serialize-knob master-vol)}
+    )
+
+  (deserialize [self data]
+    (doseq [[k v] (:osc data)]
+      (a/setv (get osc k) v)
+      )
+    (doseq [[k v] (:filt data)]
+      (a/setv (get filt k) v)
+      )
+    (doseq [[k v] (:envs data)]
+      (a/setv (get envs k) v)
+      )
+    (a/setv master-vol (:master-vol data))
     )
 
   (set-prop [_ prop val]

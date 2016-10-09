@@ -441,6 +441,11 @@
 
 (defonce BPM (atom 100))
 
+;; NA WYJEBANIE
+(defonce mem (atom {}))
+
+(declare hello-world)
+
 (defn svg-control-box []
   [:svg {:width 120 :height 230}
    [:rect.group.red {:x 10 :y 10 :rx 5 :ry 5 :width 100 :height 210}]
@@ -455,11 +460,35 @@
 
    [control-btn "SAVE" 15 30 90 30
     (fn []
+
+
+      (println "SAVED SYNTH"
+               ;; TAK SIE DOSTAJE ZSERIALIZOWANEGO SYNTA
+               (reset! mem (i/serialize s)))
+
+
       (let [steps (map #(-> % :steps deref) sequencers)]
         (ajax/POST "/db"
                    {:params  {:synth steps}
                     :handler save-db-success
-                    :format :json})))]
+                    :format :json}))
+      true)]
+
+   ;; PRZYKLAD LADOWANIA:
+   [control-btn "LOAD" 15 60 90 30
+    (fn []
+      (println "LOAD" @mem)
+
+      ;; TAK SIE LADUJE ZSERIALIZOWANEGO SYNTA
+      (i/deserialize s @mem)
+
+      ;; TO JEST POTRZEBNE ZEBY PRZERYSOWAC KNOBY
+      (reagent/unmount-component-at-node (. js/document (getElementById "app")))
+      (reagent/render-component [hello-world]
+                          (. js/document (getElementById "app")))
+
+      true
+      )]
 
 
    [:g {:class (when @(:running clock) :hide)}
