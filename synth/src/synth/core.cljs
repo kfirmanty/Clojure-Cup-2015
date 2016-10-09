@@ -18,7 +18,7 @@
                (audio/connect s (:input m))
                m))
 
-(defonce sequencers [(s/sequencer s (atom [])) (s/sequencer s2 (atom []))])
+(defonce sequencers [(s/sequencer s (atom []) :phrygian-dominant) (s/sequencer s2 (atom []) :phrygian-dominant)])
 
 (defn update-steps [sequencers raw-msg]
   (let [msg (cljs.reader/read-string raw-msg)]
@@ -27,10 +27,10 @@
         (reset! (:steps (first s)) (first steps))
         (recur (rest s) (rest steps))))))
 
-(defn gen-steps [len]
+(defn gen-steps [len scale]
   (into [] (for [i (range len)]
                {:note-on true
-                :pitch (scales/random-weighted :pentatonic-minor)
+                :pitch (scales/random-weighted scale)
                 :num i})))
 
 (defn init-sequencers [sequencers]
@@ -39,7 +39,7 @@
                                     {:handler #(update-steps sequencers %)
                                      :error-handler (fn [msg]
                                                       (doseq [s sequencers]
-                                                        (reset! (:steps s) (gen-steps 16))))}))]))
+                                                        (reset! (:steps s) (gen-steps 16 (s/scale s)))))}))]))
 
 (defonce clock (s/clock sequencers (* 4 100)))
 
@@ -360,8 +360,9 @@
   )
 
 
-(defn randomize-pitch-in-seq-steps [sequencer scale-key]
+(defn randomize-pitch-in-seq-steps [sequencer]
   (let [steps (:steps sequencer)
+        scale-key (s/scale sequencer)
         steps-pitch (for [i (range (count @steps))]
                       (scales/random-weighted scale-key))
         steps-pitch-even (scales/even-out steps-pitch scale-key)]
@@ -398,9 +399,9 @@
    [:text.bpm-ctr {:x 720 :y 29 :text-anchor "middle"} (str (count @sts) " STEPS")]
    [control-btn "-" 665 15 25 20 (fn [] (swap! sts s/shorten-seq)
                                    true)]
-   [control-btn "+" 750 15 25 20 (fn [] (swap! sts s/expand-seq :pentatonic-minor)
+   [control-btn "+" 750 15 25 20 (fn [] (swap! sts s/expand-seq (s/scale sqs))
                                             true)]
-   [control-btn "RAND. NOTES" 780 15 100 20 (fn [] (randomize-pitch-in-seq-steps sqs :pentatonic-minor)
+   [control-btn "RAND. NOTES" 780 15 100 20 (fn [] (randomize-pitch-in-seq-steps sqs)
                                             true)]
 
    [control-btn "EUCLIDEAN" 885 15 90 20

@@ -36,7 +36,7 @@
 (defn bpm->ms [bpm]
   (/ (* 60 1000) bpm))
 
-(defrecord Sequencer [steps synth-chan transformer]
+(defrecord Sequencer [steps synth-chan transformer scale]
   Stepable
   (step [this timer]
     (let [step-num (mod timer (count @steps))
@@ -85,9 +85,9 @@
 (defn sequencer
   ([synth-chan]
    (->Sequencer (atom [{:note-on true :pitch 69}])
-                synth-chan (atom identity)))
-  ([synth-chan steps]
-   (->Sequencer steps synth-chan (atom identity))))
+                synth-chan (atom identity) (atom :pentatonic-minor)))
+  ([synth-chan steps scale]
+   (->Sequencer steps synth-chan (atom identity) (atom scale))))
 
 (defn clock [sequencers bpm]
   (->Clock sequencers (atom (bpm->ms bpm)) (atom false) (atom 0)))
@@ -124,3 +124,6 @@
         copy-step (nth steps (dec seq-len))
         new-step (assoc copy-step :num (-> copy-step :num inc))]
     (into [] (conj steps new-step))))
+
+(defn scale [sequencer]
+  @(:scale sequencer))
