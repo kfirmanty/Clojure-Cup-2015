@@ -255,13 +255,15 @@ svg text.bpm-ctr {
 svg text.name {
     font-size: 30px;
     fill: #008188;
-    font-family: 'Roboto Condensed', Helvetica, sans-serif
+    font-family: 'Roboto Condensed', Helvetica, sans-serif;
+    user-select:none;
 }
 
 svg text.seq-name {
     font-size: 20px;
     fill: #008188;
-    font-family: 'Roboto Condensed', Helvetica, sans-serif
+    font-family: 'Roboto Condensed', Helvetica, sans-serif;
+    user-select:none;
 }
 
 .seq-header {

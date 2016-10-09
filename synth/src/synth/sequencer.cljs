@@ -90,7 +90,7 @@
    (->Sequencer steps synth-chan (atom identity))))
 
 (defn clock [sequencers bpm]
-  (->Clock sequencers (atom (bpm->ms bpm)) (atom true) (atom 0)))
+  (->Clock sequencers (atom (bpm->ms bpm)) (atom false) (atom 0)))
 
 (defn split-tail [s]
   (let [l (last s)]
