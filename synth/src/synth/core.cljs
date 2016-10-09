@@ -393,7 +393,10 @@
                             ))}
    [:rect.group.seq-header {:x 10 :y 10 :width 970 :height 30 :rx 5 :ry 5}]
    [:text.seq-name {:x 16 :y 32} (str "SEQ " nam)]
-   [control-btn "-" 720 15 25 20 (fn [] (swap! sts s/shorten-seq)
+
+   [:rect.bpm-ctr {:x 685 :y 15 :width 75 :height 20}]
+   [:text.bpm-ctr {:x 720 :y 29 :text-anchor "middle"} (str (count @sts) " STEPS")]
+   [control-btn "-" 665 15 25 20 (fn [] (swap! sts s/shorten-seq)
                                    true)]
    [control-btn "+" 750 15 25 20 (fn [] (swap! sts s/expand-seq :pentatonic-minor)
                                             true)]
