@@ -114,3 +114,13 @@
         e (euclidean turned-on num)]
     (->> (interleave e steps) (partition 2) (map (fn [[t s]] (if (= 1 t) (assoc s :note-on true)
                                                       (assoc s :note-on false)))) (into []))))
+
+
+(defn shorten-seq [steps]
+  (take (-> steps count dec (max 1)) steps))
+
+(defn expand-seq [steps scale-key]
+  (let [seq-len (count steps)
+        copy-step (nth steps (dec seq-len))
+        new-step (assoc copy-step :num (-> copy-step :num inc))]
+    (conj steps new-step)))
