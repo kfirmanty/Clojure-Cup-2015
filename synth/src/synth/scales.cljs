@@ -8,6 +8,12 @@
 
 (def ^:const base 69)
 
+(defn next-scale [scale index-fn]
+  (let [scales-vec (map first scales)
+        index (->> scales-vec (map-indexed (fn [in v] (if (= v scale) in nil))) (filter some?) first)
+        n-index (-> index index-fn (max 0) (min (dec (count scales))))]
+    (nth scales-vec n-index)))
+
 (defn random-pitch-val []
   (int (+ base (* 24 (- 0.5 (Math/random))))))
 

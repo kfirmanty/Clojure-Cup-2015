@@ -120,10 +120,15 @@
   (into [] (take (-> steps count dec (max 1)) steps)))
 
 (defn expand-seq [steps scale-key]
-  (let [seq-len (count steps)
-        copy-step (nth steps (dec seq-len))
-        new-step (assoc copy-step :num (-> copy-step :num inc))]
-    (into [] (conj steps new-step))))
+  (if (< (count steps) 16)
+    (let [seq-len (count steps)
+          copy-step (nth steps (dec seq-len))
+          new-step (assoc copy-step :num (-> copy-step :num inc))]
+      (into [] (conj steps new-step)))
+    steps))
 
 (defn scale [sequencer]
   @(:scale sequencer))
+
+(defn change-scale [sequencer scale]
+  (reset! (:scale sequencer) scale))
