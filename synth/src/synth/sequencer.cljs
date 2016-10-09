@@ -117,10 +117,10 @@
 
 
 (defn shorten-seq [steps]
-  (take (-> steps count dec (max 1)) steps))
+  (into [] (take (-> steps count dec (max 1)) steps)))
 
 (defn expand-seq [steps scale-key]
   (let [seq-len (count steps)
         copy-step (nth steps (dec seq-len))
         new-step (assoc copy-step :num (-> copy-step :num inc))]
-    (conj steps new-step)))
+    (into [] (conj steps new-step))))

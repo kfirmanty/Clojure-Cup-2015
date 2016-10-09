@@ -30,7 +30,7 @@
 (defn gen-steps [len]
   (into [] (for [i (range len)]
                {:note-on true
-                :pitch (scales/random-weighted :phrygian-dominant)
+                :pitch (scales/random-weighted :pentatonic-minor)
                 :num i})))
 
 (defn init-sequencers [sequencers]
@@ -393,7 +393,10 @@
                             ))}
    [:rect.group.seq-header {:x 10 :y 10 :width 970 :height 30 :rx 5 :ry 5}]
    [:text.seq-name {:x 16 :y 32} (str "SEQ " nam)]
-
+   [control-btn "-" 720 15 25 20 (fn [] (swap! sts s/shorten-seq)
+                                   true)]
+   [control-btn "+" 750 15 25 20 (fn [] (swap! sts s/expand-seq :pentatonic-minor)
+                                            true)]
    [control-btn "RAND. NOTES" 780 15 100 20 (fn [] (randomize-pitch-in-seq-steps sqs :pentatonic-minor)
                                             true)]
 
