@@ -408,12 +408,20 @@
 (defn save-db-success [msg]
   (println msg))
 
+(defn spy [s x]
+  (println s x)
+  x)
+
+(defonce BPM (atom 120))
+
 (defn svg-control-box []
   [:svg {:width 120 :height 230}
    [:rect.group.red {:x 10 :y 10 :rx 5 :ry 5 :width 100 :height 210}]
    [:text.gtitle.red {:x 15 :y 25 } "CONTROL"]
-   ;;[control-btn "-" 22 40 30 30 #(shorten-seq (first sequencers))]
-   ;;[control-btn "+" 67 40 30 30 #(expand-seq (first sequencers) :pentatonic-minor)]
+   [:rect.bpm-ctr {:x 35 :y 135 :width 60 :height 20}]
+   [:text.bpm-ctr {:x 60 :y 147 :text-anchor "middle"} @BPM]
+   [control-btn "-" 15 135 25 20 (fn [] (swap! BPM - 5) (s/set-bpm clock (* 4 @BPM)))]
+   [control-btn "+" 80 135 25 20 (fn [] (swap! BPM + 5) (s/set-bpm clock (* 4 @BPM)))]
    [control-btn "SAVE" 15 75 90 30
     (fn []
       (let [steps (map #(-> % :steps deref) sequencers)]
@@ -421,16 +429,19 @@
                    {:params  {:synth steps}
                     :handler save-db-success
                     :format :json})))]
-    [control-btn "EUCLIDEAN" 15 110 90 30
+    [control-btn "EUCLIDEAN" 15 110 90 20
     (fn []
       (let [steps (map :steps sequencers)]
         (doseq [s steps]
           (swap! s s/euclidean-steps))))]
 
-   [control-btn (if @(:running clock) "PAUSE" "PLAY") 15 163 90 50
+
+
+   [control-btn (if (spy "clock deref" @(:running clock)) "PAUSE" "PLAY") 15 163 90 50
     (fn []
       (if @(:running clock) (s/stop clock) (s/start clock))
       )]
+
    [control-btn "RAND. NOTES" 15 40 90 30 (fn [] (doseq [s sequencers]
                                                  (randomize-pitch-in-seq-steps s :pentatonic-minor))
                                            true)]
