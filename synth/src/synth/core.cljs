@@ -5,7 +5,8 @@
             [synth.mg20 :as syn]
             [synth.sequencer :as s]
             [synth.scales :as scales]
-            [ajax.core :as ajax]))
+            [ajax.core :as ajax]
+            [cognitect.transit :as t]))
 
 (enable-console-print!)
 
@@ -20,12 +21,25 @@
 
 (defonce sequencers [(s/sequencer s (atom []) :pentatonic-minor) (s/sequencer s2 (atom []) :pentatonic-minor)])
 
-(defn update-steps [sequencers raw-msg]
-  (let [msg (cljs.reader/read-string raw-msg)]
-    (loop [s sequencers steps msg]
+(declare hello-world)
+
+(defn redraw []
+      (reagent/unmount-component-at-node (. js/document (getElementById "app")))
+      (reagent/render-component [hello-world]
+                          (. js/document (getElementById "app"))))
+
+(defn update-synths [sequencers raw-msg]
+  (let [r (t/reader :json)
+        msg (clojure.walk/keywordize-keys (t/read r raw-msg))
+        steps (:steps msg)
+        [s1r s2r] (:synths msg)]
+    (loop [s sequencers steps steps]
       (when (and (some? (first s)) (some? (first steps)))
         (reset! (:steps (first s)) (first steps))
-        (recur (rest s) (rest steps))))))
+        (recur (rest s) (rest steps))))
+    (i/deserialize s s1r)
+    (i/deserialize s2 s2r)
+    (redraw)))
 
 (defn gen-steps [len scale]
   (into [] (for [i (range len)]
@@ -36,7 +50,7 @@
 (defn init-sequencers [sequencers]
   (let [hash (clojure.string/replace js/window.location.hash #"#" "")
         db-res (when hash (ajax/GET (str "/db/" hash)
-                                    {:handler #(update-steps sequencers %)
+                                    {:handler #(update-synths sequencers %)
                                      :error-handler (fn [msg]
                                                       (doseq [s sequencers]
                                                         (reset! (:steps s) (gen-steps 16 (s/scale s)))))}))]))
@@ -433,18 +447,13 @@
 
 
 (defn save-db-success [msg]
-  (println msg))
+  (aset js/window.location "hash" (str "#" msg)))
 
 (defn spy [s x]
   (println s x)
   x)
 
 (defonce BPM (atom 100))
-
-;; NA WYJEBANIE
-(defonce mem (atom {}))
-
-(declare hello-world)
 
 (defn svg-control-box []
   [:svg {:width 120 :height 230}
@@ -460,36 +469,13 @@
 
    [control-btn "SAVE" 15 30 90 30
     (fn []
-
-
-      (println "SAVED SYNTH"
-               ;; TAK SIE DOSTAJE ZSERIALIZOWANEGO SYNTA
-               (reset! mem (i/serialize s)))
-
-
       (let [steps (map #(-> % :steps deref) sequencers)]
         (ajax/POST "/db"
-                   {:params  {:synth steps}
+                   {:params  {:steps steps
+                              :synths [(i/serialize s) (i/serialize s2)]}
                     :handler save-db-success
                     :format :json}))
       true)]
-
-   ;; PRZYKLAD LADOWANIA:
-   [control-btn "LOAD" 15 60 90 30
-    (fn []
-      (println "LOAD" @mem)
-
-      ;; TAK SIE LADUJE ZSERIALIZOWANEGO SYNTA
-      (i/deserialize s @mem)
-
-      ;; TO JEST POTRZEBNE ZEBY PRZERYSOWAC KNOBY
-      (reagent/unmount-component-at-node (. js/document (getElementById "app")))
-      (reagent/render-component [hello-world]
-                          (. js/document (getElementById "app")))
-
-      true
-      )]
-
 
    [:g {:class (when @(:running clock) :hide)}
     [control-btn "PLAY"  15 163 90 50
@@ -548,7 +534,6 @@
      [:canvas#monf {:width (:fsize mon) :height 100}]]))
 
 (defn hello-world []
-  (init-sequencers sequencers)
   [:div#wrap
    [svg-control-box]
    [svg-synth-box s "A"]
@@ -558,7 +543,7 @@
      ^{:key (str "se-view-" (rand))} [svg-seq-box sequencer (:steps sequencer) nam])
    ;[sequencer-block sequencer clock]
    ])
-
+  (init-sequencers sequencers)
 (reagent/render-component [hello-world]
                           (. js/document (getElementById "app")))
 

@@ -12,7 +12,9 @@
                  [factual/clj-leveldb "0.1.1"]
                  [compojure "1.4.0"]
                  [ring/ring-defaults "0.1.5"]
-                 [ring/ring-json "0.4.0"]]
+                 [ring/ring-json "0.4.0"]
+                 [org.clojure/data.json "0.2.6"]
+                 [com.cognitect/transit-cljs "0.8.239"]]
 
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-figwheel "0.5.0-1"]
