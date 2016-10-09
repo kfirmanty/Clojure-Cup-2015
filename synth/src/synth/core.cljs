@@ -421,6 +421,11 @@
                    {:params  {:synth steps}
                     :handler save-db-success
                     :format :json})))]
+    [control-btn "EUCLIDEAN" 15 110 90 30
+    (fn []
+      (let [steps (map :steps sequencers)]
+        (doseq [s steps]
+          (swap! s s/euclidean-steps))))]
 
    [control-btn (if @(:running clock) "PAUSE" "PLAY") 15 163 90 50
     (fn []

@@ -91,3 +91,26 @@
 
 (defn clock [sequencers bpm]
   (->Clock sequencers (atom (bpm-to-ms bpm)) (atom true) (atom 0)))
+
+(defn split-tail [s]
+  (let [l (last s)]
+    (split-with #(not= l %) s)))
+
+(defn euclidean [a b]
+  (let [zeros (- b a)
+        f-s (concat (repeat a [1]) (repeat zeros [0]))]
+    (loop [[h-els t-els] (split-tail f-s)]
+      (let [n-hs (map concat h-els t-els)
+            n-ts (drop (count n-hs) t-els)
+            o-hs (drop (count n-hs) h-els)
+            n-s (concat n-hs o-hs n-ts)]
+        (if (empty? n-hs)
+          (flatten n-s)
+          (recur (split-tail n-s)))))))
+
+(defn euclidean-steps [steps]
+  (let [num (count steps)
+        turned-on (->> steps (filter :note-on) count)
+        e (euclidean turned-on num)]
+    (->> (interleave e steps) (partition 2) (map (fn [[t s]] (if (= 1 t) (assoc s :note-on true)
+                                                      (assoc s :note-on false)))) (into []))))
