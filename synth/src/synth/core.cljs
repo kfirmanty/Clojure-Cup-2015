@@ -454,16 +454,15 @@
                     :handler save-db-success
                     :format :json})))]
 
+   [:g
+    [control-btn-atomic (:running clock) {true "PAUSE" false "PLAY"} 15 163 90 50
+     (fn []
+       (if-not (spy "clock check" @(:running clock)) (s/start clock) (s/stop clock))
 
-   (if-not @(:running clock)
-     [control-btn "PLAY" 15 163 90 50
-      (fn []
-        (s/start clock)
-        )]
-     [control-btn "PAUSE" 15 163 90 50
-      (fn []
-        (s/stop clock)
-        )])
+       ;;(reagent/force-update-all)
+       true
+       )]
+    ]
 
 
 
