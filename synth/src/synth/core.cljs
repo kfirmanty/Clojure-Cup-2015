@@ -395,16 +395,6 @@
      (doseq [i (range (count @steps))]
        (swap! steps assoc-in [i :pitch] (nth steps-pitch-even i)))))
 
-(defn shorten-seq [sequencer]
-  (swap! (:steps sequencer) #(take (-> % count dec (max 1)) %)))
-
-(defn expand-seq [sequencer scale-key]
-  (let [steps (:steps sequencer)
-        seq-len (count @steps)
-        base-step (nth @steps (dec seq-len))
-        new-step (assoc base-step :num (-> base-step :num inc))]
-    (swap! steps #(conj % new-step))))
-
 (defn save-db-success [msg]
   (println msg))
 
@@ -420,8 +410,8 @@
    [:text.gtitle.red {:x 15 :y 25 } "CONTROL"]
    [:rect.bpm-ctr {:x 35 :y 135 :width 60 :height 20}]
    [:text.bpm-ctr {:x 60 :y 147 :text-anchor "middle"} @BPM]
-   [control-btn "-" 15 135 25 20 (fn [] (swap! BPM - 5) (s/set-bpm clock (* 4 @BPM)))]
-   [control-btn "+" 80 135 25 20 (fn [] (swap! BPM + 5) (s/set-bpm clock (* 4 @BPM)))]
+   [control-btn "-" 15 135 25 20 (fn [] (swap! BPM - 5) (s/set-bpm clock (* 4 @BPM)) (swap! (-> sequencers first :steps) s/shorten-seq))]
+   [control-btn "+" 80 135 25 20 (fn [] (swap! BPM + 5) (s/set-bpm clock (* 4 @BPM)) (swap! (-> sequencers first :steps) #(s/expand-seq % :pentatonic-minor)))]
    [control-btn "SAVE" 15 75 90 30
     (fn []
       (let [steps (map #(-> % :steps deref) sequencers)]
@@ -434,8 +424,6 @@
       (let [steps (map :steps sequencers)]
         (doseq [s steps]
           (swap! s s/euclidean-steps))))]
-
-
 
    [control-btn (if (spy "clock deref" @(:running clock)) "PAUSE" "PLAY") 15 163 90 50
     (fn []
