@@ -18,7 +18,7 @@
                (audio/connect s (:input m))
                m))
 
-(defonce sequencers [(s/sequencer s (atom []) :phrygian-dominant) (s/sequencer s2 (atom []) :phrygian-dominant)])
+(defonce sequencers [(s/sequencer s (atom []) :pentatonic-minor) (s/sequencer s2 (atom []) :pentatonic-minor)])
 
 (defn update-steps [sequencers raw-msg]
   (let [msg (cljs.reader/read-string raw-msg)]
