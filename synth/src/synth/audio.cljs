@@ -97,12 +97,12 @@
     ;(println "trigger" a (current d) s (current r))
     (let [t (.-currentTime ctx)]
       (doto (.-gain out)
-       ; (.cancelScheduledValues t)
-        (.setValueAtTime 0 t)
+        (.cancelScheduledValues t)
+        ;(.setValueAtTime 0 t)
         (.setValueAtTime (.-value (.-gain out)) t)
-        (.linearRampToValueAtTime 1 (+ t (current a)))
+        (.linearRampToValueAtTime 1 (+ t 0.005 (current a)))
         ;(.setValueAtTime (.-value (.-gain out)) (+ t (current a)))
-        (.linearRampToValueAtTime (current s) (+ t (current a) (current d)))))
+        (.linearRampToValueAtTime (current s) (+ t 0.005 (current a) (current d)))))
     )
 
   (detrigger [_]
@@ -112,7 +112,7 @@
         (.cancelScheduledValues (.-gain out) t)
         (.setValueAtTime (.-gain out) (.-value (.-gain out)) t)
      ;   (println (+ t rr))
-        (.linearRampToValueAtTime (.-gain out) 0 (+ t rr))
+        (.linearRampToValueAtTime (.-gain out) 0 (+ 0.005 t rr))
 
         ))))
 

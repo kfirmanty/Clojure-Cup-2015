@@ -212,10 +212,10 @@
 
    [:rect.group {:x 290 :y 10 :rx 5 :ry 5 :width 130 :height 140}]
    [:text.gtitle {:x 295 :y 25 } "ENVELOPE"]
-   [svg-knob "ATTACK" 320 50 (-> s :envs :a)]
-   [svg-knob "DECAY" 390 50 (-> s :envs :d)]
+   [svg-knob "ATTACK" 320 50 (-> s :envs :a) nil {:taper taper-log}]
+   [svg-knob "DECAY" 390 50 (-> s :envs :d) nil {:taper taper-log}]
    [svg-knob "SUSTAIN" 320 110 (-> s :envs :s)]
-   [svg-knob "RELEASE" 390 110 (-> s :envs :r)]
+   [svg-knob "RELEASE" 390 110 (-> s :envs :r) nil {:taper taper-log}]
    [:text.name {:x 300 :y 195} (str "SYNTH " name)]
    ])
 
@@ -462,15 +462,26 @@
                     :format :json})))]
 
 
-   (if-not @(:running clock)
-     [control-btn "PLAY" 15 163 90 50
-      (fn []
-        (s/start clock)
-        )]
-     [control-btn "PAUSE" 15 163 90 50
-      (fn []
-        (s/stop clock)
-        )])
+   [:g {:class (when @(:running clock) :hide)}
+    [control-btn "PLAY"  15 163 90 50
+     (fn []
+       (if-not @(:running clock) (s/start clock) (s/stop clock))
+
+       ;;(reagent/force-update-all)
+       true
+       )]
+    ]
+
+   [:g {:class (when-not @(:running clock) :hide)}
+    [control-btn "PAUSE"  15 163 90 50
+     (fn []
+       (if-not @(:running clock) (s/start clock) (s/stop clock))
+
+       ;;(reagent/force-update-all)
+       true
+       )]
+    ]
+
 
 
 

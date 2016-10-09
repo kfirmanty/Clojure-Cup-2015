@@ -280,6 +280,9 @@ svg text.seq-name {
     stroke-dasharray: 970,0,10,990,30;
 }
 
+.hide {
+    display: none;
+}
 
 .knob {
     width: 120px;

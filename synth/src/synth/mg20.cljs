@@ -32,7 +32,7 @@
 
 (defn vf-switcher [t]
   (fn [n]
-    (let [vf (get [:sawtooth :triangle :square :sine] n)]
+    (let [vf (get [:sawtooth :square :triangle :sine] n)]
       (set! (.-type t) (name vf))
       )))
 
