@@ -22,6 +22,7 @@
 (defonce sequencers [(s/sequencer s (atom []) :pentatonic-minor) (s/sequencer s2 (atom []) :pentatonic-minor)])
 
 (declare hello-world)
+(defonce modifying (atom false))
 
 (defn redraw []
       (reagent/unmount-component-at-node (. js/document (getElementById "app")))
@@ -49,11 +50,17 @@
 
 (defn init-sequencers [sequencers]
   (let [hash (clojure.string/replace js/window.location.hash #"#" "")
-        db-res (when hash (ajax/GET (str "/db/" hash)
-                                    {:handler #(update-synths sequencers %)
-                                     :error-handler (fn [msg]
-                                                      (doseq [s sequencers]
-                                                        (reset! (:steps s) (gen-steps 16 (s/scale s)))))}))]))
+        db-res (if-not (empty? hash)
+                 (do
+                   (println "HASH" hash (empty? hash))
+                   (reset! modifying true)
+                   (ajax/GET (str "/db/" hash)
+                             {:handler #(update-synths sequencers %)
+                              :error-handler (fn [msg]
+                                               (doseq [s sequencers]
+                                                 (reset! (:steps s) (gen-steps 16 (s/scale s)))))}))
+                 (doseq [s sequencers]
+                                                 (reset! (:steps s) (gen-steps 16 (s/scale s)))))]))
 
 (defonce clock (s/clock sequencers (* 4 100)))
 
@@ -446,7 +453,10 @@
     (swap! steps #(conj % new-step))))
 
 
+(defonce shash (atom nil))
+
 (defn save-db-success [msg]
+  (reset! shash msg)
   (aset js/window.location "hash" (str "#" msg)))
 
 (defn spy [s x]
@@ -454,6 +464,7 @@
   x)
 
 (defonce BPM (atom 100))
+
 
 (defn svg-control-box []
   [:svg {:width 120 :height 230}
@@ -467,15 +478,36 @@
    [control-btn "-" 15 140 25 20 (fn [] (swap! BPM - 5) (s/set-bpm clock (* 4 @BPM)))]
    [control-btn "+" 80 140 25 20 (fn [] (swap! BPM + 5) (s/set-bpm clock (* 4 @BPM)))]
 
-   [control-btn "SAVE" 15 30 90 30
-    (fn []
-      (let [steps (map #(-> % :steps deref) sequencers)]
-        (ajax/POST "/db"
-                   {:params  {:steps steps
-                              :synths [(i/serialize s) (i/serialize s2)]}
-                    :handler save-db-success
-                    :format :json}))
-      true)]
+   [:g {:class (when (some? @shash) :hide)}
+    [control-btn "SAVE" 15 30 90 30
+     (fn []
+       (let [steps (map #(-> % :steps deref) sequencers)]
+         (ajax/POST "/db"
+                    {:params  {:steps steps
+                               :synths [(i/serialize s) (i/serialize s2)]}
+                     :handler save-db-success
+                     :format :json}))
+       true)]
+    [:g {:class (when-not @modifying :hide
+                          )}
+     [:text.gtitle.red {:x 15 :y 80 } "SAVING WILL"]
+     [:text.gtitle.red {:x 35 :y 93 } "CREATE NEW"]
+     [:text.gtitle.red {:x 55 :y 106 } "VERSION"]]
+    ]
+
+   [:g.ctl-btn.push {:class  (when (nil? @shash) :hide)
+                     :transform (str "translate(" 15 "," 30 ")")
+
+
+                     }
+
+    [:rect {:x 0 :y 0 :width 90 :height 30 :rx 5 :ry 5}]
+    [:text {:x (/ 90 2) :y (if (>= 30 30) (* 30 0.6) (* 30 0.7)) :text-anchor :middle} "SAVED"]
+    [:text.gtitle.red {:x 0 :y 50 } "SHARE THE URL"]
+    [:text.gtitle.red {:x 20 :y 63 } "OF THIS"]
+     [:text.gtitle.red {:x 40 :y 76 } "WINDOW"]
+    ]
+
 
    [:g {:class (when @(:running clock) :hide)}
     [control-btn "PLAY"  15 163 90 50
